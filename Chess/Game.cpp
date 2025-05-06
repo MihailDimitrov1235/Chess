@@ -34,40 +34,54 @@ Game::Game() : whiteMove(true)
 		}
 	}
 
-	setupBackRank(WHITE, 0);
-	setupPawns(WHITE, 1);
-	setupPawns(BLACK, 6);
-	setupBackRank(BLACK, 7);
+	setupBackRank(BLACK, 0);
+	setupPawns(BLACK, 1);
+	setupPawns(WHITE, BOARD_SIZE - 2);
+	setupBackRank(WHITE, BOARD_SIZE - 1);
 }
 
 
+void Game::printCols(bool reverse)
+{
+	wcout << L"  ";
+	for (size_t i = 0; i < BOARD_SIZE; i++)
+	{
+		char letter = reverse ? 'a' + BOARD_SIZE - i - 1 : 'a' + i;
+		wcout << letter << L" ";
+	}
+	wcout << endl;
+}
 
 void Game::printBoard()
 {
+	bool reverse = !whiteMove;
+
+	printCols(reverse);
+
 	int pieceColor = BLACK_COLOR;
 	for (size_t i = 0; i < BOARD_SIZE; i++)
 	{
-		wcout << i << L" ";
+		wcout << (reverse ? i + 1 : BOARD_SIZE - i) << L" ";
 		for (size_t j = 0; j < BOARD_SIZE; j++) {
 			bool isWhiteSquare = (i + j) % 2 == 0;
 			int bgColor = isWhiteSquare ? LIGHT_GRAY_COLOR : DARK_GRAY_COLOR;
 
 			setColor(pieceColor, bgColor);
-			wcout << board[i][j].getCode();
 
-			if (j != BOARD_SIZE - 1 || board[i][j].getType() == EMPTY_SQUARE)
+			Piece piece = reverse ? board[BOARD_SIZE - i - 1][BOARD_SIZE - j - 1] : board[i][j];
+			wcout << piece.getCode();
+
+			if (j != BOARD_SIZE - 1 || piece.getType() == EMPTY_SQUARE)
 			{
 				wcout << L" ";
 			}
 		}
 		setColor(WHITE_COLOR, BLACK_COLOR);
-		wcout << endl;
+		if (board[i][BOARD_SIZE - 1].getType() != EMPTY_SQUARE) {
+			wcout << L" ";
+		}
+		wcout << L" " << (reverse ? i + 1 : BOARD_SIZE - i) << endl;
 	}
-	wcout << L"  ";
-	for (size_t i = 0; i < BOARD_SIZE; i++)
-	{
-		char letter = 'a' + i;
-		wcout << letter << L" ";
-	}
-	wcout << endl;
+
+	printCols(reverse);
 }

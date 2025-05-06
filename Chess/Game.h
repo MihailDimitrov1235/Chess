@@ -10,6 +10,8 @@ private:
 	void setupPawns(COLORS color, int row);
 	void setupBackRank(COLORS color, int row);
 
+	void printCols(bool reverse);
+
 public:
 	Game();
 	void printBoard();
