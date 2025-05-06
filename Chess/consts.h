@@ -1,46 +1,25 @@
 #pragma once
-const wchar_t* WHITE[] = {
-	L"\u2654", // king
-	L"\u2655", // queen
-	L"\u2656", // rook
-	L"\u2657", // bishop
-	L"\u2658", // knight
-	L"\u2659"  // pawn
+const int BOARD_SIZE = 8;
+
+extern const wchar_t* WHITE_PIECES[];
+extern const wchar_t* BLACK_PIECES[];
+
+enum PIECES {
+	EMPTY_SQUARE = -1,
+	KING = 0,
+	QUEEN = 1,
+	ROOK = 2,
+	BISHOP = 3,
+	KNIGHT = 4,
+	PAWN = 5,
 };
 
-const wchar_t* BLACK[] = {
-	L"\u265A", // king
-	L"\u265B", // queen
-	L"\u265C", // rook
-	L"\u265D", // bishop
-	L"\u265E", // knight
-	L"\u265F"  // pawn
+enum COLORS {
+	NONE = -1,
+	WHITE = 0,
+	BLACK = 1
 };
-
-const enum PIECES {
-	KING,
-	QUEEN,
-	ROOK,
-	BISHOP,
-	KNIGHT,
-	PAWN,
-};
-
-const int EMPTY_SQUARE = -1;
 const int BLACK_OFFSET = 6;
-
-const int defaultBoard[8][8] = {
-	{ ROOK, KNIGHT, BISHOP, QUEEN, KING, BISHOP, KNIGHT, ROOK},   // white back rank
-	{ PAWN, PAWN, PAWN, PAWN, PAWN, PAWN, PAWN, PAWN},   // white pawns
-	{ EMPTY_SQUARE, EMPTY_SQUARE, EMPTY_SQUARE, EMPTY_SQUARE, EMPTY_SQUARE, EMPTY_SQUARE, EMPTY_SQUARE, EMPTY_SQUARE },
-	{ EMPTY_SQUARE, EMPTY_SQUARE, EMPTY_SQUARE, EMPTY_SQUARE, EMPTY_SQUARE, EMPTY_SQUARE, EMPTY_SQUARE, EMPTY_SQUARE },
-	{ EMPTY_SQUARE, EMPTY_SQUARE, EMPTY_SQUARE, EMPTY_SQUARE, EMPTY_SQUARE, EMPTY_SQUARE, EMPTY_SQUARE, EMPTY_SQUARE },
-	{ EMPTY_SQUARE, EMPTY_SQUARE, EMPTY_SQUARE, EMPTY_SQUARE, EMPTY_SQUARE, EMPTY_SQUARE, EMPTY_SQUARE, EMPTY_SQUARE },
-	{ PAWN + BLACK_OFFSET, PAWN + BLACK_OFFSET, PAWN + BLACK_OFFSET, PAWN + BLACK_OFFSET,
-	  PAWN + BLACK_OFFSET, PAWN + BLACK_OFFSET, PAWN + BLACK_OFFSET, PAWN + BLACK_OFFSET },   // black pawns
-	{ ROOK + BLACK_OFFSET, KNIGHT + BLACK_OFFSET, BISHOP + BLACK_OFFSET, QUEEN + BLACK_OFFSET,
-	  KING + BLACK_OFFSET, BISHOP + BLACK_OFFSET, KNIGHT + BLACK_OFFSET, ROOK + BLACK_OFFSET }    // black back rank
-};
 
 const int WHITE_COLOR = 15;
 const int BLACK_COLOR = 0;
