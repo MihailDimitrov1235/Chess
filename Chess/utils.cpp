@@ -53,3 +53,11 @@ void movePiece(Piece& p1, Piece& p2) {
 	p2 = p1;
 	p1 = Piece();
 }
+
+int absVal(int number) {
+	if (number < 0)
+	{
+		return -number;
+	}
+	return number;
+}

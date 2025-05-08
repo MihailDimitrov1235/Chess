@@ -7,3 +7,4 @@ int getCol(const char* location);
 int getRow(const char* location);
 void validateLocation(const char* location);
 void swapPieces(Piece& p1, Piece& p2);
+int absVal(int number);

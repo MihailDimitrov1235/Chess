@@ -26,7 +26,17 @@ void Game::setupPawns(COLORS color, int row)
 	}
 }
 
-Game::Game() : whiteMove(true)
+Game::Game() : whiteMove(true),
+whiteCanCastleLong(true),
+whiteCanCastleShort(true),
+blackCanCastleLong(true),
+blackCanCastleShort(true),
+whiteInCheck(false),
+blackInCheck(false),
+whiteKingRow(7),
+whiteKingCol(4),
+blackKingRow(0),
+blackKingCol(4)
 {
 	for (int row = 0; row < BOARD_SIZE; ++row) {
 		for (int col = 0; col < BOARD_SIZE; ++col) {
@@ -39,7 +49,6 @@ Game::Game() : whiteMove(true)
 	setupPawns(WHITE, BOARD_SIZE - 2);
 	setupBackRank(WHITE, BOARD_SIZE - 1);
 }
-
 
 void Game::printCols(bool reverse)
 {
@@ -97,8 +106,12 @@ bool Game::isSquareEnemyPiece(int row, int col, PIECES type) {
 
 bool Game::isKingCapturable(int row, int col)
 {
-	Piece king = board[row][col];
-	COLORS color = king.getColor();
+	int kingRow = whiteMove ? whiteKingRow : blackKingRow;
+	int kingCol = whiteMove ? whiteKingCol : blackKingCol;
+	Piece king = board[kingRow][kingCol];
+	board[kingRow][kingCol] = Piece();
+
+	bool result = false;
 
 	// check for enemy king
 	const int kingOffsets[8][2] = { {1, 1}, {0, 1}, {-1, 1}, {1, 0}, {-1, 0}, {1, -1}, {0, -1}, {-1, -1} };
@@ -107,7 +120,7 @@ bool Game::isKingCapturable(int row, int col)
 		int r = row + kingOffsets[i][0];
 		int c = col + kingOffsets[i][1];
 		if (isSquareEnemyPiece(r, c, KING)) {
-			return true;
+			result = true;
 		}
 	}
 
@@ -115,7 +128,7 @@ bool Game::isKingCapturable(int row, int col)
 	const int pawnDirection = whiteMove ? -1 : 1;
 	if (isSquareEnemyPiece(row + pawnDirection, col + 1, PAWN) || isSquareEnemyPiece(row + pawnDirection, col - 1, PAWN))
 	{
-		return true;
+		result = true;
 	}
 
 	//check for enemy knight
@@ -125,7 +138,7 @@ bool Game::isKingCapturable(int row, int col)
 		int r = row + knightOffsets[i][0];
 		int c = col + knightOffsets[i][1];
 		if (isSquareEnemyPiece(r, c, KNIGHT)) {
-			return true;
+			result = true;
 		}
 	}
 
@@ -133,7 +146,6 @@ bool Game::isKingCapturable(int row, int col)
 	const int rookDirections[4][2] = { {1, 0}, {-1, 0}, {0, 1}, {0, -1} };
 	for (size_t i = 0; i < 4; i++)
 	{
-
 		int r = row + rookDirections[i][0];
 		int c = col + rookDirections[i][1];
 		while (r >= 0 && r < BOARD_SIZE && c >= 0 && c < BOARD_SIZE) {
@@ -141,7 +153,7 @@ bool Game::isKingCapturable(int row, int col)
 			if (!board[r][c].isEmpty())
 			{
 				if (isSquareEnemyPiece(r, c, QUEEN) || isSquareEnemyPiece(r, c, ROOK)) {
-					return true;
+					result = true;
 				}
 				break;
 			}
@@ -154,7 +166,6 @@ bool Game::isKingCapturable(int row, int col)
 	const int bishopDirections[4][2] = { {1, 1}, {-1, 1}, {1, -1}, {-1, -1} };
 	for (size_t i = 0; i < 4; i++)
 	{
-
 		int r = row + bishopDirections[i][0];
 		int c = col + bishopDirections[i][1];
 		while (r >= 0 && r < BOARD_SIZE && c >= 0 && c < BOARD_SIZE) {
@@ -162,7 +173,7 @@ bool Game::isKingCapturable(int row, int col)
 			if (!board[r][c].isEmpty())
 			{
 				if (isSquareEnemyPiece(r, c, QUEEN) || isSquareEnemyPiece(r, c, BISHOP)) {
-					return true;
+					result = true;
 				}
 				break;
 			}
@@ -170,8 +181,8 @@ bool Game::isKingCapturable(int row, int col)
 			c += bishopDirections[i][1];
 		}
 	}
-
-	return false;
+	board[kingRow][kingCol] = king;
+	return result;
 }
 
 bool Game::isGameOver()
@@ -179,20 +190,68 @@ bool Game::isGameOver()
 	return false;
 }
 
-void Game::validateKingMove(int rowFrom, int colFrom, int rowTo, int colTo)
+void Game::validateCastle(int rowFrom, int colFrom, int rowTo, int colTo)
 {
-	Piece toPiece = board[rowTo][colTo];
-	board[rowTo][colTo] = board[rowFrom][colFrom];
+	Piece king = board[rowFrom][colFrom];
+	COLORS color = king.getColor();
 
-	if (isKingCapturable(rowTo, colTo))
+	if (colFrom != 4)
+		throw invalid_argument("Invalid castle: King not on starting square.");
+
+	bool isWhite = (color == WHITE);
+	int row = isWhite ? 7 : 0;
+
+	// Long castle
+	if (colTo == 2)
 	{
-		board[rowFrom][colFrom] = board[rowTo][colTo];
-		board[rowTo][colTo] = toPiece;
-		throw invalid_argument("Invalid move. King cannot move into check.");
+		if ((isWhite && !whiteCanCastleLong) || (!isWhite && !blackCanCastleLong)) {
+			throw invalid_argument("Cannot castle long.");
+		}
+
+		if (!board[row][1].isEmpty() || !board[row][2].isEmpty() || !board[row][3].isEmpty()) {
+			throw invalid_argument("Cannot castle through pieces.");
+		}
+
+		if (isKingCapturable(row, 4) || isKingCapturable(row, 3) || isKingCapturable(row, 2)) {
+			throw invalid_argument("Cannot castle through or into check.");
+		}
 	}
 
-	board[rowFrom][colFrom] = board[rowTo][colTo];
-	board[rowTo][colTo] = toPiece;
+	// Short castle
+	else if (colTo == 6)
+	{
+		if ((isWhite && !whiteCanCastleShort) || (!isWhite && !blackCanCastleShort)) {
+			throw invalid_argument("Cannot castle short.");
+		}
+
+		if (!board[row][5].isEmpty() || !board[row][6].isEmpty()) {
+			throw invalid_argument("Cannot castle through pieces.");
+		}
+		if (isKingCapturable(row, 4) || isKingCapturable(row, 5) || isKingCapturable(row, 6)) {
+			throw invalid_argument("Cannot castle through or into check.");
+		}
+	}
+	else
+	{
+		throw invalid_argument("Invalid castle target square.");
+	}
+}
+
+
+void Game::validateKingMove(int rowFrom, int colFrom, int rowTo, int colTo)
+{
+	if (absVal(colFrom - colTo) == 2 && rowFrom == rowTo) {
+		validateCastle(rowFrom, colFrom, rowTo, colTo);
+		return;
+	}
+	if (absVal(colFrom - colTo) > 1 || absVal(rowFrom - rowTo) > 1)
+	{
+		throw invalid_argument("Invalid move. King can only move to adjacent squares.");
+	}
+	if (isKingCapturable(rowTo, colTo))
+	{
+		throw invalid_argument("Invalid move. King cannot move into check.");
+	}
 }
 
 void Game::validateMove(int rowFrom, int colFrom, int rowTo, int colTo)
@@ -252,8 +311,70 @@ void Game::makeMove()
 
 	validateMove(rowFrom, colFrom, rowTo, colTo);
 
-	board[rowTo][colTo] = board[rowFrom][colFrom];
+	Piece movingPiece = board[rowFrom][colFrom];
+	PIECES type = movingPiece.getType();
+	COLORS color = movingPiece.getColor();
+
+	if (type == KING) {
+		if (color == WHITE) {
+			whiteCanCastleShort = false;
+			whiteCanCastleLong = false;
+
+			whiteKingRow = rowTo;
+			whiteKingCol = colTo;
+
+			if (rowFrom == 7 && colFrom == 4 && rowTo == 7 && colTo == 6 && whiteCanCastleShort) {
+				board[7][5] = board[7][7];
+				board[7][7] = Piece();
+			}
+			if (rowFrom == 7 && colFrom == 4 && rowTo == 7 && colTo == 2 && whiteCanCastleLong) {
+				board[7][3] = board[7][0];
+				board[7][0] = Piece();
+			}
+		}
+		else {
+			blackCanCastleShort = false;
+			blackCanCastleLong = false;
+
+			blackKingRow = rowTo;
+			blackKingCol = colTo;
+
+			if (rowFrom == 0 && colFrom == 4 && rowTo == 0 && colTo == 6 && blackCanCastleShort) {
+				board[0][5] = board[0][7];
+				board[0][7] = Piece();
+			}
+			if (rowFrom == 0 && colFrom == 4 && rowTo == 0 && colTo == 2 && blackCanCastleLong) {
+				board[0][3] = board[0][0];
+				board[0][0] = Piece();
+			}
+		}
+	}
+
+	if (type == ROOK) {
+		if (color == WHITE) {
+			if (rowFrom == 7 && colFrom == 0) whiteCanCastleLong = false;
+			if (rowFrom == 7 && colFrom == 7) whiteCanCastleShort = false;
+		}
+		else {
+			if (rowFrom == 0 && colFrom == 0) blackCanCastleLong = false;
+			if (rowFrom == 0 && colFrom == 7) blackCanCastleShort = false;
+		}
+	}
+
+	if (board[rowTo][colTo].getType() == ROOK) {
+		if (board[rowTo][colTo].getColor() == WHITE) {
+			if (rowTo == 7 && colTo == 0) whiteCanCastleLong = false;
+			if (rowTo == 7 && colTo == 7) whiteCanCastleShort = false;
+		}
+		else {
+			if (rowTo == 0 && colTo == 0) blackCanCastleLong = false;
+			if (rowTo == 0 && colTo == 7) blackCanCastleShort = false;
+		}
+	}
+
+	board[rowTo][colTo] = movingPiece;
 	board[rowFrom][colFrom] = Piece();
 
 	whiteMove = !whiteMove;
 }
+
