@@ -201,7 +201,7 @@ void Game::validateCastle(int rowFrom, int colFrom, int rowTo, int colTo)
 	bool isWhite = (color == WHITE);
 	int row = isWhite ? 7 : 0;
 
-	// Long castle
+	// long castle
 	if (colTo == 2)
 	{
 		if ((isWhite && !whiteCanCastleLong) || (!isWhite && !blackCanCastleLong)) {
@@ -217,7 +217,7 @@ void Game::validateCastle(int rowFrom, int colFrom, int rowTo, int colTo)
 		}
 	}
 
-	// Short castle
+	// short castle
 	else if (colTo == 6)
 	{
 		if ((isWhite && !whiteCanCastleShort) || (!isWhite && !blackCanCastleShort)) {
@@ -323,11 +323,11 @@ void Game::makeMove()
 			whiteKingRow = rowTo;
 			whiteKingCol = colTo;
 
-			if (rowFrom == 7 && colFrom == 4 && rowTo == 7 && colTo == 6 && whiteCanCastleShort) {
+			if (rowFrom == 7 && colFrom == 4 && rowTo == 7 && colTo == 6) {
 				board[7][5] = board[7][7];
 				board[7][7] = Piece();
 			}
-			if (rowFrom == 7 && colFrom == 4 && rowTo == 7 && colTo == 2 && whiteCanCastleLong) {
+			if (rowFrom == 7 && colFrom == 4 && rowTo == 7 && colTo == 2) {
 				board[7][3] = board[7][0];
 				board[7][0] = Piece();
 			}
@@ -339,11 +339,11 @@ void Game::makeMove()
 			blackKingRow = rowTo;
 			blackKingCol = colTo;
 
-			if (rowFrom == 0 && colFrom == 4 && rowTo == 0 && colTo == 6 && blackCanCastleShort) {
+			if (rowFrom == 0 && colFrom == 4 && rowTo == 0 && colTo == 6) {
 				board[0][5] = board[0][7];
 				board[0][7] = Piece();
 			}
-			if (rowFrom == 0 && colFrom == 4 && rowTo == 0 && colTo == 2 && blackCanCastleLong) {
+			if (rowFrom == 0 && colFrom == 4 && rowTo == 0 && colTo == 2) {
 				board[0][3] = board[0][0];
 				board[0][0] = Piece();
 			}
