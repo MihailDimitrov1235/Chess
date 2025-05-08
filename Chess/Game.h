@@ -30,6 +30,8 @@ private:
 	bool isSquareEnemyPiece(int row, int col, PIECES type);
 	bool isKingCapturable(int row, int col);
 
+	void handleCastlingRelatedMove(int rowFrom, int colFrom, int rowTo, int colTo);
+
 	void printCols(bool reverse);
 
 public:

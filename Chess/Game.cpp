@@ -293,28 +293,10 @@ void Game::validateMove(int rowFrom, int colFrom, int rowTo, int colTo)
 
 }
 
-void Game::makeMove()
-{
-	const int BUFFER_SIZE = 128;
-	char moveFrom[BUFFER_SIZE];
-	char moveTo[BUFFER_SIZE];
-	wcout << (whiteMove ? "White" : "Black") << "'s move (e.g. e2 e4): ";
-	cin >> moveFrom >> moveTo;
-
-	validateLocation(moveFrom);
-	validateLocation(moveTo);
-
-	int colFrom = getCol(moveFrom);
-	int rowFrom = getRow(moveFrom);
-	int colTo = getCol(moveTo);
-	int rowTo = getRow(moveTo);
-
-	validateMove(rowFrom, colFrom, rowTo, colTo);
-
+void Game::handleCastlingRelatedMove(int rowFrom, int colFrom, int rowTo, int colTo) {
 	Piece movingPiece = board[rowFrom][colFrom];
 	PIECES type = movingPiece.getType();
 	COLORS color = movingPiece.getColor();
-
 	if (type == KING) {
 		if (color == WHITE) {
 			whiteCanCastleShort = false;
@@ -371,8 +353,28 @@ void Game::makeMove()
 			if (rowTo == 0 && colTo == 7) blackCanCastleShort = false;
 		}
 	}
+}
 
-	board[rowTo][colTo] = movingPiece;
+void Game::makeMove()
+{
+	const int BUFFER_SIZE = 128;
+	char moveFrom[BUFFER_SIZE];
+	char moveTo[BUFFER_SIZE];
+	wcout << (whiteMove ? "White" : "Black") << "'s move (e.g. e2 e4): ";
+	cin >> moveFrom >> moveTo;
+
+	validateLocation(moveFrom);
+	validateLocation(moveTo);
+
+	int colFrom = getCol(moveFrom);
+	int rowFrom = getRow(moveFrom);
+	int colTo = getCol(moveTo);
+	int rowTo = getRow(moveTo);
+
+	validateMove(rowFrom, colFrom, rowTo, colTo);
+
+	handleCastlingRelatedMove(rowFrom, colFrom, rowTo, colTo);
+	board[rowTo][colTo] = board[rowFrom][colFrom];
 	board[rowFrom][colFrom] = Piece();
 
 	whiteMove = !whiteMove;
