@@ -171,12 +171,10 @@ void MoveValidator::validateSlidingMove(int rowFrom, int colFrom, int rowTo, int
 		if (allowStraight && !allowDiagonal) {
 			throw invalid_argument("Invalid rook move. Move must be a straight line.");
 		}
-		else if (!allowStraight && allowDiagonal) {
+		if (!allowStraight && allowDiagonal) {
 			throw invalid_argument("Invalid bishop move. Move must be a diagonal line.");
 		}
-		else {
-			throw invalid_argument("Invalid queen move. Move must be a diagonal or straight line.");
-		}
+		throw invalid_argument("Invalid queen move. Move must be a diagonal or straight line.");
 	}
 
 	int rowDir = (rowDiff == 0) ? 0 : (rowDiff > 0 ? 1 : -1);
@@ -191,6 +189,17 @@ void MoveValidator::validateSlidingMove(int rowFrom, int colFrom, int rowTo, int
 		}
 		r += rowDir;
 		c += colDir;
+	}
+}
+
+void MoveValidator::validateKnightMove(int rowFrom, int colFrom, int rowTo, int colTo)
+{
+	int rowDiff = absVal(rowTo - rowFrom);
+	int colDiff = absVal(colTo - colFrom);
+
+	if (!((rowDiff == 1 && colDiff == 2) || (rowDiff == 2 && colDiff == 1)))
+	{
+		throw invalid_argument("Invalid knight move. Must move in an L-shape.");
 	}
 }
 
@@ -245,7 +254,7 @@ void MoveValidator::validateMove(int rowFrom, int colFrom, int rowTo, int colTo)
 		validateSlidingMove(rowFrom, colFrom, rowTo, colTo, true, false);
 		break;
 	case KNIGHT:
-		//validatePawnMove();
+		validateKnightMove(rowFrom, colFrom, rowTo, colTo);
 		break;
 	case PAWN:
 		//validatePawnMove();
