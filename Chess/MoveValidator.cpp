@@ -203,6 +203,46 @@ void MoveValidator::validateKnightMove(int rowFrom, int colFrom, int rowTo, int 
 	}
 }
 
+void MoveValidator::validatePawnMove(int rowFrom, int colFrom, int rowTo, int colTo) {
+	int startingRow = state.whiteMove ? 6 : 1;
+	int direction = state.whiteMove ? -1 : 1;
+
+	int rowDiff = rowTo - rowFrom;
+	int colDiff = colTo - colFrom;
+
+	wcout << state.enPassantSquare[0] << " " << state.enPassantSquare[1] << endl;
+
+	if (absVal(colDiff) == 1 && rowDiff == direction) {
+		if (!state.board[rowTo][colTo].isEmpty()) {
+			return;
+		}
+		if (state.enPassantSquare[0] == rowTo && state.enPassantSquare[1] == colTo)
+		{
+			return;
+		}
+		throw invalid_argument("Invalid pawn move. Diagonal move must capture.");
+	}
+
+	if (colDiff == 0) {
+		if (!state.board[rowTo][colTo].isEmpty()) {
+			throw invalid_argument("Invalid pawn move. Cannot capture vertically.");
+		}
+		if (rowDiff == direction) {
+			return;
+		}
+		if (rowDiff == 2 * direction && rowFrom == startingRow) {
+			int midRow = rowFrom + direction;
+			if (!state.board[midRow][colFrom].isEmpty()) {
+				throw invalid_argument("Invalid pawn move. Cannot jump over piece.");
+			}
+			return;
+		}
+		throw invalid_argument("Invalid pawn move. Invalid vertical position.");
+	}
+
+	throw invalid_argument("Invalid pawn move. Pawns can only move forward or capture diagonally.");
+}
+
 void MoveValidator::validateKingSafety(int rowFrom, int colFrom, int rowTo, int colTo)
 {
 	Piece toPiece = state.board[rowTo][colTo];
@@ -257,7 +297,7 @@ void MoveValidator::validateMove(int rowFrom, int colFrom, int rowTo, int colTo)
 		validateKnightMove(rowFrom, colFrom, rowTo, colTo);
 		break;
 	case PAWN:
-		//validatePawnMove();
+		validatePawnMove(rowFrom, colFrom, rowTo, colTo);
 		break;
 	default:
 		throw logic_error("Unknown piece type.");

@@ -15,4 +15,6 @@ struct GameState {
 	int whiteKingCol;
 	int blackKingRow;
 	int blackKingCol;
+
+	int enPassantSquare[2] = { -1, -1 };
 };

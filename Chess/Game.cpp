@@ -163,6 +163,21 @@ void Game::handleCastlingRelatedMove(int rowFrom, int colFrom, int rowTo, int co
 	}
 }
 
+void Game::handleEnPassantRelatedMove(int rowFrom, int colFrom, int rowTo, int colTo) {
+	if (state.board[rowFrom][colFrom].getType() == PAWN && rowTo == state.enPassantSquare[0] && colTo == state.enPassantSquare[1]) {
+		state.board[rowFrom][colTo] = Piece();
+	}
+
+	if (state.board[rowFrom][colFrom].getType() == PAWN && absVal(rowTo - rowFrom) == 2) {
+		state.enPassantSquare[0] = (rowFrom + rowTo) / 2;
+		state.enPassantSquare[1] = colFrom;
+	}
+	else {
+		state.enPassantSquare[0] = -1;
+		state.enPassantSquare[1] = -1;
+	}
+}
+
 void Game::makeMove()
 {
 	const int BUFFER_SIZE = 128;
@@ -182,6 +197,7 @@ void Game::makeMove()
 	validator.validateMove(rowFrom, colFrom, rowTo, colTo);
 
 	handleCastlingRelatedMove(rowFrom, colFrom, rowTo, colTo);
+	handleEnPassantRelatedMove(rowFrom, colFrom, rowTo, colTo);
 	state.board[rowTo][colTo] = state.board[rowFrom][colFrom];
 	state.board[rowFrom][colFrom] = Piece();
 
