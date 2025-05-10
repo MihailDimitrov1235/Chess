@@ -160,23 +160,34 @@ void MoveValidator::validateKingMove(int rowFrom, int colFrom, int rowTo, int co
 	}
 }
 
-void MoveValidator::validateQueenMove(int rowFrom, int colFrom, int rowTo, int colTo) {
-	int rowDifference = rowTo - rowFrom;
-	int colDifference = colTo - colFrom;
+void MoveValidator::validateSlidingMove(int rowFrom, int colFrom, int rowTo, int colTo, bool allowDiagonal, bool allowStraight) {
+	int rowDiff = rowTo - rowFrom;
+	int colDiff = colTo - colFrom;
 
-	if (!(rowFrom == rowTo || colFrom == colTo || absVal(rowDifference) == absVal(colDifference))) {
-		throw invalid_argument("Invalid queen move. Not a straight or diagonal line.");
+	bool isDiagonal = absVal(rowDiff) == absVal(colDiff);
+	bool isStraight = rowFrom == rowTo || colFrom == colTo;
+
+	if (!((allowStraight && isStraight) || (allowDiagonal && isDiagonal))) {
+		if (allowStraight && !allowDiagonal) {
+			throw invalid_argument("Invalid rook move. Move must be a straight line.");
+		}
+		else if (!allowStraight && allowDiagonal) {
+			throw invalid_argument("Invalid bishop move. Move must be a diagonal line.");
+		}
+		else {
+			throw invalid_argument("Invalid queen move. Move must be a diagonal or straight line.");
+		}
 	}
 
-	int rowDir = (rowDifference == 0) ? 0 : (rowDifference > 0 ? 1 : -1);
-	int colDir = (colDifference == 0) ? 0 : (colDifference > 0 ? 1 : -1);
+	int rowDir = (rowDiff == 0) ? 0 : (rowDiff > 0 ? 1 : -1);
+	int colDir = (colDiff == 0) ? 0 : (colDiff > 0 ? 1 : -1);
 
 	int r = rowFrom + rowDir;
 	int c = colFrom + colDir;
 
 	while (r != rowTo || c != colTo) {
 		if (!state.board[r][c].isEmpty()) {
-			throw invalid_argument("Invalid queen move. Path is blocked.");
+			throw invalid_argument("Invalid move. Path is blocked.");
 		}
 		r += rowDir;
 		c += colDir;
@@ -225,13 +236,13 @@ void MoveValidator::validateMove(int rowFrom, int colFrom, int rowTo, int colTo)
 		validateKingMove(rowFrom, colFrom, rowTo, colTo);
 		break;
 	case QUEEN:
-		validateQueenMove(rowFrom, colFrom, rowTo, colTo);
+		validateSlidingMove(rowFrom, colFrom, rowTo, colTo, true, true);
 		break;
 	case ROOK:
-		//validatePawnMove();
+		validateSlidingMove(rowFrom, colFrom, rowTo, colTo, false, true);
 		break;
 	case BISHOP:
-		//validatePawnMove();
+		validateSlidingMove(rowFrom, colFrom, rowTo, colTo, true, false);
 		break;
 	case KNIGHT:
 		//validatePawnMove();

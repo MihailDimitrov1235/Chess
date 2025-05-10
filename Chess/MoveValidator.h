@@ -14,6 +14,6 @@ public:
 	void validateMove(int rowFrom, int colFrom, int rowTo, int colTo);
 	void validateKingMove(int rowFrom, int colFrom, int rowTo, int colTo);
 	void validateCastle(int rowFrom, int colFrom, int rowTo, int colTo);
-	void validateQueenMove(int rowFrom, int colFrom, int rowTo, int colTo);
+	void validateSlidingMove(int rowFrom, int colFrom, int rowTo, int colTo, bool allowDiagonal, bool allowStraight);
 	void validateKingSafety(int rowFrom, int colFrom, int rowTo, int colTo);
 };
