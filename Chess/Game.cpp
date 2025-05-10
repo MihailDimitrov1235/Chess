@@ -237,7 +237,6 @@ void Game::validateCastle(int rowFrom, int colFrom, int rowTo, int colTo)
 	}
 }
 
-
 void Game::validateKingMove(int rowFrom, int colFrom, int rowTo, int colTo)
 {
 	if (absVal(colFrom - colTo) == 2 && rowFrom == rowTo) {
@@ -254,8 +253,54 @@ void Game::validateKingMove(int rowFrom, int colFrom, int rowTo, int colTo)
 	}
 }
 
+void Game::validateQueenMove(int rowFrom, int colFrom, int rowTo, int colTo) {
+	int rowDifference = rowTo - rowFrom;
+	int colDifference = colTo - colFrom;
+
+	if (!(rowFrom == rowTo || colFrom == colTo || absVal(rowDifference) == absVal(colDifference))) {
+		throw invalid_argument("Invalid queen move. Not a straight or diagonal line.");
+	}
+
+	int rowDir = (rowDifference == 0) ? 0 : (rowDifference > 0 ? 1 : -1);
+	int colDir = (colDifference == 0) ? 0 : (colDifference > 0 ? 1 : -1);
+
+	int r = rowFrom + rowDir;
+	int c = colFrom + colDir;
+
+	while (r != rowTo || c != colTo) {
+		if (!board[r][c].isEmpty()) {
+			throw invalid_argument("Invalid queen move. Path is blocked.");
+		}
+		r += rowDir;
+		c += colDir;
+	}
+}
+
+void Game::validateKingSafety(int rowFrom, int colFrom, int rowTo, int colTo)
+{
+	Piece toPiece = board[rowTo][colTo];
+	board[rowTo][colTo] = board[rowFrom][colFrom];
+	board[rowFrom][colFrom] = Piece();
+
+	int kingRow = whiteMove ? whiteKingRow : blackKingRow;
+	int kingCol = whiteMove ? whiteKingCol : blackKingCol;
+	if (isKingCapturable(kingRow, kingCol))
+	{
+		board[rowFrom][colFrom] = board[rowTo][colTo];
+		board[rowTo][colTo] = toPiece;
+		throw invalid_argument("Invalid move. Your king will be in danger.");
+	}
+	board[rowFrom][colFrom] = board[rowTo][colTo];
+	board[rowTo][colTo] = toPiece;
+}
+
 void Game::validateMove(int rowFrom, int colFrom, int rowTo, int colTo)
 {
+	if (rowFrom == rowTo && colFrom == colTo)
+	{
+		throw invalid_argument("Invalid move. Select 2 different squares.");
+	}
+
 	Piece fromPiece = board[rowFrom][colFrom];
 	Piece toPiece = board[rowTo][colTo];
 
@@ -273,7 +318,7 @@ void Game::validateMove(int rowFrom, int colFrom, int rowTo, int colTo)
 		validateKingMove(rowFrom, colFrom, rowTo, colTo);
 		break;
 	case QUEEN:
-		//validatePawnMove();
+		validateQueenMove(rowFrom, colFrom, rowTo, colTo);
 		break;
 	case ROOK:
 		//validatePawnMove();
@@ -291,6 +336,7 @@ void Game::validateMove(int rowFrom, int colFrom, int rowTo, int colTo)
 		throw logic_error("Unknown piece type.");
 	}
 
+	validateKingSafety(rowFrom, colFrom, rowTo, colTo);
 }
 
 void Game::handleCastlingRelatedMove(int rowFrom, int colFrom, int rowTo, int colTo) {
