@@ -138,6 +138,53 @@ bool Game::doesPlayerHaveLegalMoves()
 	return false;
 }
 
+bool Game::hasPiecesForMate()
+{
+	int blackMinorPieces = 0;
+	COLORS blackBishopSquareColor = NONE;
+	int whiteMinorPieces = 0;
+	COLORS whiteBishopSquareColor = NONE;
+	for (int row = 0; row < BOARD_SIZE; row++) {
+		for (int col = 0; col < BOARD_SIZE; col++) {
+			Piece piece = state.board[row][col];
+			if (piece.isEmpty() || piece.getType() == KING) {
+				continue;
+			}
+			PIECES type = piece.getType();
+			if (type == PAWN || type == ROOK || type == QUEEN) {
+				return true;
+			}
+			COLORS squareColor = (row + col) % 2 == 0 ? WHITE : BLACK;
+			if (piece.getColor() == WHITE) {
+				if (type == KNIGHT || (type == BISHOP && squareColor != whiteBishopSquareColor))
+				{
+					whiteMinorPieces++;
+				}
+				if (type == BISHOP)
+				{
+					whiteBishopSquareColor = squareColor;
+				}
+			}
+			else {
+				if (type == KNIGHT || (type == BISHOP && squareColor != blackBishopSquareColor))
+				{
+					blackMinorPieces++;
+				}
+				if (type == BISHOP)
+				{
+					blackBishopSquareColor = squareColor;
+				}
+			}
+
+		}
+	}
+	if (whiteMinorPieces >= 2 || blackMinorPieces >= 2)
+	{
+		return true;
+	}
+	return false;
+}
+
 bool Game::isGameOver()
 {
 	if (!doesPlayerHaveLegalMoves())
@@ -151,6 +198,9 @@ bool Game::isGameOver()
 			wcout << "Game ends in a draw because " << (state.whiteMove ? "White" : "Black") << " has no legal moves.";
 		}
 		return true;
+	}
+	if (!hasPiecesForMate()) {
+		wcout << "Game ends in a draw because of lack of pieces for checkmate.";
 	}
 	/*if (isPosRepeated3Times())
 	{

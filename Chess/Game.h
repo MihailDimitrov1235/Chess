@@ -12,6 +12,7 @@ private:
 	void handleEnPassantRelatedMove(int rowFrom, int colFrom, int rowTo, int colTo);
 	bool doesPieceHaveLegalMoves(int row, int col);
 	bool doesPlayerHaveLegalMoves();
+	bool hasPiecesForMate();
 	void handlePromotion(int row, int col);
 	void printCols(bool reverse);
 
