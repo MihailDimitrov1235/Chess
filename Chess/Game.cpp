@@ -237,6 +237,52 @@ void Game::handleEnPassantRelatedMove(int rowFrom, int colFrom, int rowTo, int c
 	}
 }
 
+void Game::handlePromotion(int row, int col)
+{
+	int promotionRow = state.whiteMove ? 0 : 7;
+	COLORS color = state.whiteMove ? WHITE : BLACK;
+	if (state.board[row][col].getType() == PAWN && promotionRow == row)
+	{
+		wcout << "Promote pawn into: \n(1) Queen \n(2) Rook \n(3) Bishop \n(4) Knight\n";
+		int selectedPromotion;
+		bool promotionSelected = false;
+		while (!promotionSelected) {
+			try {
+				cin >> selectedPromotion;
+				if (selectedPromotion < 1 || selectedPromotion > 4)
+				{
+					throw invalid_argument("Select number between 1 and 4:");
+				}
+				promotionSelected = true;
+			}
+			catch (const exception& e) {
+				wcout << e.what() << endl;
+				cin.clear();
+				cin.sync();
+				cin.ignore();
+			}
+		}
+		switch (selectedPromotion)
+		{
+		case 1:
+			state.board[row][col] = Piece(color, QUEEN);
+			break;
+		case 2:
+			state.board[row][col] = Piece(color, ROOK);
+			break;
+		case 3:
+			state.board[row][col] = Piece(color, BISHOP);
+			break;
+		case 4:
+			state.board[row][col] = Piece(color, KNIGHT);
+			break;
+		default:
+			throw logic_error("Invalid promotion piece selected.");
+			break;
+		}
+	}
+}
+
 void Game::makeMove()
 {
 	const int BUFFER_SIZE = 128;
@@ -259,6 +305,7 @@ void Game::makeMove()
 	handleEnPassantRelatedMove(rowFrom, colFrom, rowTo, colTo);
 	state.board[rowTo][colTo] = state.board[rowFrom][colFrom];
 	state.board[rowFrom][colFrom] = Piece();
+	handlePromotion(rowTo, colTo);
 
 	state.whiteMove = !state.whiteMove;
 }

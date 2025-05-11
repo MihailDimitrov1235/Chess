@@ -8,8 +8,7 @@ using namespace std;
 MoveValidator::MoveValidator(GameState& state) : state(state) {}
 
 bool MoveValidator::isSquareEnemyPiece(int row, int col, PIECES type) {
-	if (row < 0 || row >= BOARD_SIZE || col < 0 || col >= BOARD_SIZE)
-	{
+	if (row < 0 || row >= BOARD_SIZE || col < 0 || col >= BOARD_SIZE) {
 		return false;
 	}
 	COLORS enemyColor = state.whiteMove ? BLACK : WHITE;
@@ -27,8 +26,7 @@ bool MoveValidator::isKingCapturable(int row, int col)
 
 	// check for enemy king
 	const int kingOffsets[8][2] = { {1, 1}, {0, 1}, {-1, 1}, {1, 0}, {-1, 0}, {1, -1}, {0, -1}, {-1, -1} };
-	for (size_t i = 0; i < 8; i++)
-	{
+	for (size_t i = 0; i < 8; i++) {
 		int r = row + kingOffsets[i][0];
 		int c = col + kingOffsets[i][1];
 		if (isSquareEnemyPiece(r, c, KING)) {
@@ -38,8 +36,7 @@ bool MoveValidator::isKingCapturable(int row, int col)
 
 	// check for enemy pawns
 	const int pawnDirection = state.whiteMove ? -1 : 1;
-	if (isSquareEnemyPiece(row + pawnDirection, col + 1, PAWN) || isSquareEnemyPiece(row + pawnDirection, col - 1, PAWN))
-	{
+	if (isSquareEnemyPiece(row + pawnDirection, col + 1, PAWN) || isSquareEnemyPiece(row + pawnDirection, col - 1, PAWN)) {
 		result = true;
 	}
 
@@ -301,5 +298,8 @@ void MoveValidator::validateMove(int rowFrom, int colFrom, int rowTo, int colTo)
 		throw logic_error("Unknown piece type.");
 	}
 
-	validateKingSafety(rowFrom, colFrom, rowTo, colTo);
+	if (fromPiece.getType() != KING)
+	{
+		validateKingSafety(rowFrom, colFrom, rowTo, colTo);
+	}
 }
