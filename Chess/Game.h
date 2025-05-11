@@ -13,6 +13,7 @@ private:
 	bool doesPieceHaveLegalMoves(int row, int col);
 	bool doesPlayerHaveLegalMoves();
 	bool hasPiecesForMate();
+	bool hasThreefoldRepetition();
 	void handlePromotion(int row, int col);
 	void printCols(bool reverse);
 

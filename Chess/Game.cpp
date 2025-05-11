@@ -64,8 +64,9 @@ void Game::printCols(bool reverse)
 
 void Game::printBoard()
 {
-	bool reverse = !state.whiteMove;
+	wcout << "\033[2J\033[H"; // clear console and start top left
 
+	bool reverse = !state.whiteMove;
 	printCols(reverse);
 
 	int pieceColor = BLACK_COLOR;
@@ -185,6 +186,11 @@ bool Game::hasPiecesForMate()
 	return false;
 }
 
+bool Game::hasThreefoldRepetition()
+{
+	return false;
+}
+
 bool Game::isGameOver()
 {
 	if (!doesPlayerHaveLegalMoves())
@@ -202,11 +208,11 @@ bool Game::isGameOver()
 	if (!hasPiecesForMate()) {
 		wcout << "Game ends in a draw because of lack of pieces for checkmate.";
 	}
-	/*if (isPosRepeated3Times())
+	if (hasThreefoldRepetition())
 	{
-		wcout << "Game ends in a draw due to threefold repetition";
+		wcout << "Game ends in a draw due to threefold repetition.";
 		return true;
-	}*/
+	}
 	return false;
 }
 
