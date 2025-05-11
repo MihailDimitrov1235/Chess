@@ -210,8 +210,6 @@ void MoveValidator::validatePawnMove(int rowFrom, int colFrom, int rowTo, int co
 	int rowDiff = rowTo - rowFrom;
 	int colDiff = colTo - colFrom;
 
-	wcout << state.enPassantSquare[0] << " " << state.enPassantSquare[1] << endl;
-
 	if (absVal(colDiff) == 1 && rowDiff == direction) {
 		if (!state.board[rowTo][colTo].isEmpty()) {
 			return;

@@ -8,21 +8,22 @@
 
 using namespace std;
 
-void printBoard() {
-
-}
-
 int main() {
 	_setmode(_fileno(stdout), _O_U16TEXT);
 
 	Game chessGame;
+	chessGame.printBoard();
 	while (!chessGame.isGameOver()) {
+		bool validMove = false;
+		while (!validMove) {
+			try {
+				chessGame.makeMove();
+				validMove = true;
+			}
+			catch (invalid_argument e) {
+				wcout << e.what() << endl;
+			}
+		}
 		chessGame.printBoard();
-		try {
-			chessGame.makeMove();
-		}
-		catch (invalid_argument e) {
-			wcout << e.what() << endl;
-		}
 	}
 }

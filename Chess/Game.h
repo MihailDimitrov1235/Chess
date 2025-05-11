@@ -10,6 +10,8 @@ private:
 	void setupBackRank(COLORS color, int row);
 	void handleCastlingRelatedMove(int rowFrom, int colFrom, int rowTo, int colTo);
 	void handleEnPassantRelatedMove(int rowFrom, int colFrom, int rowTo, int colTo);
+	bool doesPieceHaveLegalMoves(int row, int col);
+	bool doesPlayerHaveLegalMoves();
 	void printCols(bool reverse);
 
 public:

@@ -96,8 +96,67 @@ void Game::printBoard()
 	printCols(reverse);
 }
 
+bool Game::doesPieceHaveLegalMoves(int row, int col) {
+	Piece piece = state.board[row][col];
+
+	for (int r = 0; r < BOARD_SIZE; r++) {
+		for (int c = 0; c < BOARD_SIZE; c++) {
+			if (r == row && c == col) {
+				continue;
+			}
+			try {
+				validator.validateMove(row, col, r, c);
+				return true;
+			}
+			catch (const invalid_argument&) {
+				continue;
+			}
+		}
+	}
+	return false;
+}
+
+
+bool Game::doesPlayerHaveLegalMoves()
+{
+	COLORS color = state.whiteMove ? WHITE : BLACK;
+	for (int row = 0; row < BOARD_SIZE; row++)
+	{
+		for (int col = 0; col < BOARD_SIZE; col++)
+		{
+			Piece currentPiece = state.board[row][col];
+			if (currentPiece.getColor() != color)
+			{
+				continue;
+			}
+			if (doesPieceHaveLegalMoves(row, col))
+			{
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
 bool Game::isGameOver()
 {
+	if (!doesPlayerHaveLegalMoves())
+	{
+		int kingRow = state.whiteMove ? state.whiteKingRow : state.blackKingRow;
+		int kingCol = state.whiteMove ? state.whiteKingCol : state.blackKingCol;
+		if (validator.isKingCapturable(kingRow, kingCol)) {
+			wcout << (state.whiteMove ? "Black" : "White") << " wins!";
+		}
+		else {
+			wcout << "Game ends in a draw because " << (state.whiteMove ? "White" : "Black") << " has no legal moves.";
+		}
+		return true;
+	}
+	/*if (isPosRepeated3Times())
+	{
+		wcout << "Game ends in a draw due to threefold repetition";
+		return true;
+	}*/
 	return false;
 }
 
