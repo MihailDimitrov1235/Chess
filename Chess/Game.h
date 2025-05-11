@@ -14,11 +14,15 @@ private:
 	bool doesPlayerHaveLegalMoves();
 	bool hasPiecesForMate();
 	bool hasThreefoldRepetition();
+	char* encodeBoard();
+	void savePosition();
 	void handlePromotion(int row, int col);
 	void printCols(bool reverse);
+	void freePositionsMemory();
 
 public:
 	Game();
+	~Game();
 	void printBoard();
 	bool isGameOver();
 	void makeMove();

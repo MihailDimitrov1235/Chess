@@ -26,6 +26,59 @@ void Game::setupPawns(COLORS color, int row)
 	}
 }
 
+char* Game::encodeBoard()
+{
+	char* result = new char[BOARD_SIZE * BOARD_SIZE + 1];
+	for (int row = 0; row < BOARD_SIZE; row++) {
+		for (int col = 0; col < BOARD_SIZE; col++) {
+			int index = row * BOARD_SIZE + col;
+			Piece piece = state.board[row][col];
+			char symbol = piece.getType() + 'A';
+			result[index] = piece.getColor() == WHITE ? symbol : toLower(symbol);
+		}
+	}
+	result[BOARD_SIZE * BOARD_SIZE] = '\0';
+	return result;
+}
+
+void Game::freePositionsMemory() {
+	for (size_t i = 0; i < state.positionsSize; i++)
+	{
+		delete[] state.positions[i];
+	}
+	delete[] state.positions;
+	delete[] state.positionsCounter;
+	state.positionsSize = 0;
+}
+
+void Game::savePosition()
+{
+	char* newPosition = encodeBoard();
+	for (size_t i = 0; i < state.positionsSize; i++)
+	{
+		if (compareStrs(state.positions[i], newPosition)) {
+			state.positionsCounter[i] += 1;
+			delete[] newPosition;
+			return;
+		}
+	}
+	int newSize = state.positionsSize + 1;
+	char** newPositions = new char* [newSize];
+	int* newPositionsCounter = new int[newSize];
+	for (size_t i = 0; i < state.positionsSize; i++)
+	{
+		newPositions[i] = new char[BOARD_SIZE * BOARD_SIZE + 1];
+		strcpy_s(newPositions[i], BOARD_SIZE * BOARD_SIZE + 1, state.positions[i]);
+		newPositionsCounter[i] = state.positionsCounter[i];
+	}
+	newPositions[newSize - 1] = newPosition;
+	newPositionsCounter[newSize - 1] = 1;
+	freePositionsMemory();
+	state.positions = newPositions;
+	state.positionsCounter = newPositionsCounter;
+	state.positionsSize = newSize;
+}
+
 Game::Game() : validator(state) {
 	state.whiteMove = true;
 
@@ -49,6 +102,13 @@ Game::Game() : validator(state) {
 	setupPawns(BLACK, 1);
 	setupPawns(WHITE, BOARD_SIZE - 2);
 	setupBackRank(WHITE, BOARD_SIZE - 1);
+
+	savePosition();
+}
+
+Game::~Game()
+{
+	freePositionsMemory();
 }
 
 void Game::printCols(bool reverse)
@@ -188,6 +248,12 @@ bool Game::hasPiecesForMate()
 
 bool Game::hasThreefoldRepetition()
 {
+	for (size_t i = 0; i < state.positionsSize; i++)
+	{
+		if (state.positionsCounter[i] >= 3) {
+			return true;
+		}
+	}
 	return false;
 }
 
@@ -362,7 +428,7 @@ void Game::makeMove()
 	state.board[rowTo][colTo] = state.board[rowFrom][colFrom];
 	state.board[rowFrom][colFrom] = Piece();
 	handlePromotion(rowTo, colTo);
-
 	state.whiteMove = !state.whiteMove;
+	savePosition();
 }
 
