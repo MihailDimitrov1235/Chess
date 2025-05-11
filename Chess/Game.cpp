@@ -51,6 +51,45 @@ void Game::freePositionsMemory() {
 	state.positionsSize = 0;
 }
 
+void Game::copyFrom(const Game& other) {
+	for (int row = 0; row < BOARD_SIZE; row++) {
+		for (int col = 0; col < BOARD_SIZE; col++) {
+			state.board[row][col] = other.state.board[row][col];
+		}
+	}
+
+	state.whiteMove = other.state.whiteMove;
+	state.whiteCanCastleLong = other.state.whiteCanCastleLong;
+	state.whiteCanCastleShort = other.state.whiteCanCastleShort;
+	state.blackCanCastleLong = other.state.blackCanCastleLong;
+	state.blackCanCastleShort = other.state.blackCanCastleShort;
+
+	state.whiteKingRow = other.state.whiteKingRow;
+	state.whiteKingCol = other.state.whiteKingCol;
+	state.blackKingRow = other.state.blackKingRow;
+	state.blackKingCol = other.state.blackKingCol;
+
+	state.enPassantSquare[0] = other.state.enPassantSquare[0];
+	state.enPassantSquare[1] = other.state.enPassantSquare[1];
+
+	state.positionsSize = other.state.positionsSize;
+	if (state.positionsSize > 0) {
+		state.positions = new char* [state.positionsSize];
+		state.positionsCounter = new int[state.positionsSize];
+
+		for (int i = 0; i < state.positionsSize; ++i) {
+			state.positions[i] = new char[BOARD_SIZE * BOARD_SIZE + 1];
+			strcpy_s(state.positions[i], BOARD_SIZE * BOARD_SIZE + 1, other.state.positions[i]);
+			state.positionsCounter[i] = other.state.positionsCounter[i];
+		}
+	}
+	else {
+		state.positions = nullptr;
+		state.positionsCounter = nullptr;
+	}
+}
+
+
 void Game::savePosition()
 {
 	char* newPosition = encodeBoard();
@@ -104,6 +143,20 @@ Game::Game() : validator(state) {
 	setupBackRank(WHITE, BOARD_SIZE - 1);
 
 	savePosition();
+}
+
+Game::Game(const Game& other) : validator(state) {
+	copyFrom(other);
+}
+
+Game& Game::operator=(const Game& other)
+{
+	if (this != &other)
+	{
+		freePositionsMemory();
+		copyFrom(other);
+	}
+	return *this;
 }
 
 Game::~Game()

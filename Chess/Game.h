@@ -20,8 +20,11 @@ private:
 	void printCols(bool reverse);
 	void freePositionsMemory();
 
+	void copyFrom(const Game& other);
 public:
 	Game();
+	Game(const Game& other);
+	Game& operator=(const Game& other);
 	~Game();
 	void printBoard();
 	bool isGameOver();
