@@ -1,9 +1,12 @@
+#pragma once
 #include "GameState.h"
+#include "PreviousPositions.h"
 #include "MoveValidator.h"
 
 class Game {
 private:
 	GameState state;
+	PreviousPositions prevPos;
 	MoveValidator validator;
 
 	void setupPawns(COLORS color, int row);
@@ -16,6 +19,7 @@ private:
 	bool hasThreefoldRepetition();
 	char* encodeBoard();
 	void savePosition();
+	void saveGame();
 	void handlePromotion(int row, int col);
 	void printCols(bool reverse);
 	void freePositionsMemory();
@@ -29,4 +33,5 @@ public:
 	void printBoard();
 	bool isGameOver();
 	void makeMove();
+	void loadGame();
 };

@@ -62,17 +62,29 @@ int absVal(int number) {
 	return number;
 }
 
-bool compareStrs(const char* str1, const char* str2)
+bool compareStrs(const char* str1, const char* str2, bool caseSensitive)
 {
 	if (str1 == nullptr || str2 == nullptr) {
 		return false;
 	}
 	while (*str1 && *str2) {
-		if (*str1 != *str2) {
+		if (caseSensitive && *str1 != *str2)
+		{
 			return false;
 		}
+		if (!caseSensitive && toLower(*str1) != toLower(*str2)) {
+			return false;
+		}
+
 		str1++;
 		str2++;
 	}
 	return *str1 == *str2;
+}
+
+void fixCin()
+{
+	cin.clear();
+	cin.sync();
+	cin.ignore();
 }

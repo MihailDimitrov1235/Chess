@@ -17,3 +17,5 @@ const wchar_t* BLACK_PIECES[] = {
 	L"\u265E", // KNIGHT
 	L"\u265F"  // PAWN
 };
+
+const char* const fileName = "game_save.bin";

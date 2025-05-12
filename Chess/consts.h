@@ -25,3 +25,5 @@ const int WHITE_COLOR = 15;
 const int BLACK_COLOR = 0;
 const int LIGHT_GRAY_COLOR = 7;
 const int DARK_GRAY_COLOR = 8;
+
+extern const char* const fileName;

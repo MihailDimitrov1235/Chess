@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 #include <windows.h>
 #include <io.h>
 #include <fcntl.h>
@@ -42,13 +43,13 @@ char* Game::encodeBoard()
 }
 
 void Game::freePositionsMemory() {
-	for (size_t i = 0; i < state.positionsSize; i++)
+	for (size_t i = 0; i < prevPos.positionsSize; i++)
 	{
-		delete[] state.positions[i];
+		delete[] prevPos.positions[i];
 	}
-	delete[] state.positions;
-	delete[] state.positionsCounter;
-	state.positionsSize = 0;
+	delete[] prevPos.positions;
+	delete[] prevPos.positionsCounter;
+	prevPos.positionsSize = 0;
 }
 
 void Game::copyFrom(const Game& other) {
@@ -72,20 +73,20 @@ void Game::copyFrom(const Game& other) {
 	state.enPassantSquare[0] = other.state.enPassantSquare[0];
 	state.enPassantSquare[1] = other.state.enPassantSquare[1];
 
-	state.positionsSize = other.state.positionsSize;
-	if (state.positionsSize > 0) {
-		state.positions = new char* [state.positionsSize];
-		state.positionsCounter = new int[state.positionsSize];
+	prevPos.positionsSize = other.prevPos.positionsSize;
+	if (prevPos.positionsSize > 0) {
+		prevPos.positions = new char* [prevPos.positionsSize];
+		prevPos.positionsCounter = new int[prevPos.positionsSize];
 
-		for (int i = 0; i < state.positionsSize; ++i) {
-			state.positions[i] = new char[BOARD_SIZE * BOARD_SIZE + 1];
-			strcpy_s(state.positions[i], BOARD_SIZE * BOARD_SIZE + 1, other.state.positions[i]);
-			state.positionsCounter[i] = other.state.positionsCounter[i];
+		for (int i = 0; i < prevPos.positionsSize; ++i) {
+			prevPos.positions[i] = new char[BOARD_SIZE * BOARD_SIZE + 1];
+			strcpy_s(prevPos.positions[i], BOARD_SIZE * BOARD_SIZE + 1, other.prevPos.positions[i]);
+			prevPos.positionsCounter[i] = other.prevPos.positionsCounter[i];
 		}
 	}
 	else {
-		state.positions = nullptr;
-		state.positionsCounter = nullptr;
+		prevPos.positions = nullptr;
+		prevPos.positionsCounter = nullptr;
 	}
 }
 
@@ -93,29 +94,29 @@ void Game::copyFrom(const Game& other) {
 void Game::savePosition()
 {
 	char* newPosition = encodeBoard();
-	for (size_t i = 0; i < state.positionsSize; i++)
+	for (size_t i = 0; i < prevPos.positionsSize; i++)
 	{
-		if (compareStrs(state.positions[i], newPosition)) {
-			state.positionsCounter[i] += 1;
+		if (compareStrs(prevPos.positions[i], newPosition)) {
+			prevPos.positionsCounter[i] += 1;
 			delete[] newPosition;
 			return;
 		}
 	}
-	int newSize = state.positionsSize + 1;
+	int newSize = prevPos.positionsSize + 1;
 	char** newPositions = new char* [newSize];
 	int* newPositionsCounter = new int[newSize];
-	for (size_t i = 0; i < state.positionsSize; i++)
+	for (size_t i = 0; i < prevPos.positionsSize; i++)
 	{
 		newPositions[i] = new char[BOARD_SIZE * BOARD_SIZE + 1];
-		strcpy_s(newPositions[i], BOARD_SIZE * BOARD_SIZE + 1, state.positions[i]);
-		newPositionsCounter[i] = state.positionsCounter[i];
+		strcpy_s(newPositions[i], BOARD_SIZE * BOARD_SIZE + 1, prevPos.positions[i]);
+		newPositionsCounter[i] = prevPos.positionsCounter[i];
 	}
 	newPositions[newSize - 1] = newPosition;
 	newPositionsCounter[newSize - 1] = 1;
 	freePositionsMemory();
-	state.positions = newPositions;
-	state.positionsCounter = newPositionsCounter;
-	state.positionsSize = newSize;
+	prevPos.positions = newPositions;
+	prevPos.positionsCounter = newPositionsCounter;
+	prevPos.positionsSize = newSize;
 }
 
 Game::Game() : validator(state) {
@@ -301,9 +302,9 @@ bool Game::hasPiecesForMate()
 
 bool Game::hasThreefoldRepetition()
 {
-	for (size_t i = 0; i < state.positionsSize; i++)
+	for (size_t i = 0; i < prevPos.positionsSize; i++)
 	{
-		if (state.positionsCounter[i] >= 3) {
+		if (prevPos.positionsCounter[i] >= 3) {
 			return true;
 		}
 	}
@@ -432,9 +433,7 @@ void Game::handlePromotion(int row, int col)
 			}
 			catch (const exception& e) {
 				wcout << e.what() << endl;
-				cin.clear();
-				cin.sync();
-				cin.ignore();
+				fixCin();
 			}
 		}
 		switch (selectedPromotion)
@@ -458,14 +457,58 @@ void Game::handlePromotion(int row, int col)
 	}
 }
 
+void Game::saveGame()
+{
+	ofstream outFile(fileName, ios::binary);
+	if (!outFile) {
+		throw runtime_error("Could not open save file.");
+	}
+	outFile.write(reinterpret_cast<const char*>(&state), sizeof(GameState));
+	outFile.write(reinterpret_cast<const char*>(&prevPos.positionsSize), sizeof(int));
+	for (int i = 0; i < prevPos.positionsSize; i++) {
+		outFile.write(prevPos.positions[i], BOARD_SIZE * BOARD_SIZE);
+		outFile.write(reinterpret_cast<const char*>(&prevPos.positionsCounter[i]), sizeof(int));
+	}
+	outFile.close();
+}
+
+void Game::loadGame()
+{
+	ifstream inFile(fileName, ios::binary);
+	if (!inFile) {
+		throw runtime_error("Could not open save file.");
+	}
+	inFile.read(reinterpret_cast<char*>(&state), sizeof(GameState));
+	inFile.read(reinterpret_cast<char*>(&prevPos.positionsSize), sizeof(int));
+	prevPos.positions = new char* [prevPos.positionsSize];
+	for (int i = 0; i < prevPos.positionsSize; i++) {
+		prevPos.positions[i] = new char[BOARD_SIZE * BOARD_SIZE + 1];
+		inFile.read(prevPos.positions[i], BOARD_SIZE * BOARD_SIZE);
+		prevPos.positions[i][BOARD_SIZE * BOARD_SIZE] = '\0';
+		inFile.read(reinterpret_cast<char*>(&prevPos.positionsCounter[i]), sizeof(int));
+	}
+	inFile.close();
+}
+
 void Game::makeMove()
 {
 	const int BUFFER_SIZE = 128;
 	char moveFrom[BUFFER_SIZE];
 	char moveTo[BUFFER_SIZE];
 	wcout << (state.whiteMove ? "White" : "Black") << "'s move (e.g. e2 e4): ";
-	cin >> moveFrom >> moveTo;
-
+	cin >> moveFrom;
+	while (compareStrs(moveFrom, "save", false))
+	{
+		saveGame();
+		wcout << "Game saved\n";
+		cin >> moveFrom;
+	}
+	if (compareStrs(moveFrom, "pause", false))
+	{
+		wcout << "pausing" << endl;
+		return;
+	}
+	cin >> moveTo;
 	validateLocation(moveFrom);
 	validateLocation(moveTo);
 

@@ -140,6 +140,7 @@
     <ClInclude Include="GameState.h" />
     <ClInclude Include="MoveValidator.h" />
     <ClInclude Include="Piece.h" />
+    <ClInclude Include="PreviousPositions.h" />
     <ClInclude Include="utils.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
