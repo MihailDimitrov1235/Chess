@@ -1,9 +1,12 @@
 #pragma once
 #include "GameState.h"
+#include "consts.h"
+#include "Piece.h"
 
 class MoveValidator {
 private:
-	GameState& state;
+	Piece(&board)[BOARD_SIZE][BOARD_SIZE];
+	const GameState& state;
 
 	bool isSquareEnemyPiece(int row, int col, PIECES type);
 	void validateKingMove(int rowFrom, int colFrom, int rowTo, int colTo);
@@ -14,7 +17,7 @@ private:
 	void validateKingSafety(int rowFrom, int colFrom, int rowTo, int colTo);
 
 public:
-	MoveValidator(GameState& state);
+	MoveValidator(Piece(&board)[BOARD_SIZE][BOARD_SIZE], GameState& state);
 
 	void validateMove(int rowFrom, int colFrom, int rowTo, int colTo);
 	bool isKingCapturable(int row, int col);

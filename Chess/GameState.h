@@ -1,9 +1,6 @@
 #pragma once
-#include "Piece.h"
-#include "consts.h"
 
 struct GameState {
-	Piece board[BOARD_SIZE][BOARD_SIZE];
 	bool whiteMove;
 
 	bool whiteCanCastleLong;

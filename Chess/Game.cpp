@@ -10,20 +10,20 @@
 using namespace std;
 
 void Game::setupBackRank(COLORS color, int row) {
-	state.board[row][0] = Piece(color, ROOK);
-	state.board[row][1] = Piece(color, KNIGHT);
-	state.board[row][2] = Piece(color, BISHOP);
-	state.board[row][3] = Piece(color, QUEEN);
-	state.board[row][4] = Piece(color, KING);
-	state.board[row][5] = Piece(color, BISHOP);
-	state.board[row][6] = Piece(color, KNIGHT);
-	state.board[row][7] = Piece(color, ROOK);
+	board[row][0] = Piece(color, ROOK);
+	board[row][1] = Piece(color, KNIGHT);
+	board[row][2] = Piece(color, BISHOP);
+	board[row][3] = Piece(color, QUEEN);
+	board[row][4] = Piece(color, KING);
+	board[row][5] = Piece(color, BISHOP);
+	board[row][6] = Piece(color, KNIGHT);
+	board[row][7] = Piece(color, ROOK);
 }
 
 void Game::setupPawns(COLORS color, int row)
 {
 	for (int col = 0; col < BOARD_SIZE; col++) {
-		state.board[row][col] = Piece(color, PAWN);
+		board[row][col] = Piece(color, PAWN);
 	}
 }
 
@@ -33,7 +33,7 @@ char* Game::encodeBoard()
 	for (int row = 0; row < BOARD_SIZE; row++) {
 		for (int col = 0; col < BOARD_SIZE; col++) {
 			int index = row * BOARD_SIZE + col;
-			Piece piece = state.board[row][col];
+			Piece piece = board[row][col];
 			char symbol = piece.getType() + 'A';
 			result[index] = piece.getColor() == WHITE ? symbol : toLower(symbol);
 		}
@@ -55,7 +55,7 @@ void Game::freePositionsMemory() {
 void Game::copyFrom(const Game& other) {
 	for (int row = 0; row < BOARD_SIZE; row++) {
 		for (int col = 0; col < BOARD_SIZE; col++) {
-			state.board[row][col] = other.state.board[row][col];
+			board[row][col] = other.board[row][col];
 		}
 	}
 
@@ -90,7 +90,6 @@ void Game::copyFrom(const Game& other) {
 	}
 }
 
-
 void Game::savePosition()
 {
 	char* newPosition = encodeBoard();
@@ -119,7 +118,7 @@ void Game::savePosition()
 	prevPos.positionsSize = newSize;
 }
 
-Game::Game() : validator(state) {
+Game::Game() : validator(board, state) {
 	state.whiteMove = true;
 
 	state.whiteCanCastleLong = true;
@@ -132,9 +131,9 @@ Game::Game() : validator(state) {
 	state.blackKingRow = 0;
 	state.blackKingCol = 4;
 
-	for (int row = 0; row < BOARD_SIZE; ++row) {
-		for (int col = 0; col < BOARD_SIZE; ++col) {
-			state.board[row][col] = Piece();
+	for (int row = 0; row < BOARD_SIZE; row++) {
+		for (int col = 0; col < BOARD_SIZE; col++) {
+			board[row][col] = Piece();
 		}
 	}
 
@@ -146,7 +145,7 @@ Game::Game() : validator(state) {
 	savePosition();
 }
 
-Game::Game(const Game& other) : validator(state) {
+Game::Game(const Game& other) : validator(board, state) {
 	copyFrom(other);
 }
 
@@ -193,7 +192,7 @@ void Game::printBoard()
 
 			setColor(pieceColor, bgColor);
 
-			Piece piece = reverse ? state.board[BOARD_SIZE - i - 1][BOARD_SIZE - j - 1] : state.board[i][j];
+			Piece piece = reverse ? board[BOARD_SIZE - i - 1][BOARD_SIZE - j - 1] : board[i][j];
 			wcout << piece.getCode();
 
 			if (j != BOARD_SIZE - 1 || piece.getType() == EMPTY_SQUARE)
@@ -202,7 +201,7 @@ void Game::printBoard()
 			}
 		}
 		setColor(WHITE_COLOR, BLACK_COLOR);
-		if (state.board[i][BOARD_SIZE - 1].getType() != EMPTY_SQUARE) {
+		if (board[i][BOARD_SIZE - 1].getType() != EMPTY_SQUARE) {
 			wcout << L" ";
 		}
 		wcout << L" " << (reverse ? i + 1 : BOARD_SIZE - i) << endl;
@@ -212,7 +211,7 @@ void Game::printBoard()
 }
 
 bool Game::doesPieceHaveLegalMoves(int row, int col) {
-	Piece piece = state.board[row][col];
+	Piece piece = board[row][col];
 
 	for (int r = 0; r < BOARD_SIZE; r++) {
 		for (int c = 0; c < BOARD_SIZE; c++) {
@@ -239,7 +238,7 @@ bool Game::doesPlayerHaveLegalMoves()
 	{
 		for (int col = 0; col < BOARD_SIZE; col++)
 		{
-			Piece currentPiece = state.board[row][col];
+			Piece currentPiece = board[row][col];
 			if (currentPiece.getColor() != color)
 			{
 				continue;
@@ -261,7 +260,7 @@ bool Game::hasPiecesForMate()
 	COLORS whiteBishopSquareColor = NONE;
 	for (int row = 0; row < BOARD_SIZE; row++) {
 		for (int col = 0; col < BOARD_SIZE; col++) {
-			Piece piece = state.board[row][col];
+			Piece piece = board[row][col];
 			if (piece.isEmpty() || piece.getType() == KING) {
 				continue;
 			}
@@ -337,7 +336,7 @@ bool Game::isGameOver()
 }
 
 void Game::handleCastlingRelatedMove(int rowFrom, int colFrom, int rowTo, int colTo) {
-	Piece movingPiece = state.board[rowFrom][colFrom];
+	Piece movingPiece = board[rowFrom][colFrom];
 	PIECES type = movingPiece.getType();
 	COLORS color = movingPiece.getColor();
 	if (type == KING) {
@@ -349,12 +348,12 @@ void Game::handleCastlingRelatedMove(int rowFrom, int colFrom, int rowTo, int co
 			state.whiteKingCol = colTo;
 
 			if (rowFrom == 7 && colFrom == 4 && rowTo == 7 && colTo == 6) {
-				state.board[7][5] = state.board[7][7];
-				state.board[7][7] = Piece();
+				board[7][5] = board[7][7];
+				board[7][7] = Piece();
 			}
 			if (rowFrom == 7 && colFrom == 4 && rowTo == 7 && colTo == 2) {
-				state.board[7][3] = state.board[7][0];
-				state.board[7][0] = Piece();
+				board[7][3] = board[7][0];
+				board[7][0] = Piece();
 			}
 		}
 		else {
@@ -365,12 +364,12 @@ void Game::handleCastlingRelatedMove(int rowFrom, int colFrom, int rowTo, int co
 			state.blackKingCol = colTo;
 
 			if (rowFrom == 0 && colFrom == 4 && rowTo == 0 && colTo == 6) {
-				state.board[0][5] = state.board[0][7];
-				state.board[0][7] = Piece();
+				board[0][5] = board[0][7];
+				board[0][7] = Piece();
 			}
 			if (rowFrom == 0 && colFrom == 4 && rowTo == 0 && colTo == 2) {
-				state.board[0][3] = state.board[0][0];
-				state.board[0][0] = Piece();
+				board[0][3] = board[0][0];
+				board[0][0] = Piece();
 			}
 		}
 	}
@@ -386,8 +385,8 @@ void Game::handleCastlingRelatedMove(int rowFrom, int colFrom, int rowTo, int co
 		}
 	}
 
-	if (state.board[rowTo][colTo].getType() == ROOK) {
-		if (state.board[rowTo][colTo].getColor() == WHITE) {
+	if (board[rowTo][colTo].getType() == ROOK) {
+		if (board[rowTo][colTo].getColor() == WHITE) {
 			if (rowTo == 7 && colTo == 0) state.whiteCanCastleLong = false;
 			if (rowTo == 7 && colTo == 7) state.whiteCanCastleShort = false;
 		}
@@ -399,11 +398,11 @@ void Game::handleCastlingRelatedMove(int rowFrom, int colFrom, int rowTo, int co
 }
 
 void Game::handleEnPassantRelatedMove(int rowFrom, int colFrom, int rowTo, int colTo) {
-	if (state.board[rowFrom][colFrom].getType() == PAWN && rowTo == state.enPassantSquare[0] && colTo == state.enPassantSquare[1]) {
-		state.board[rowFrom][colTo] = Piece();
+	if (board[rowFrom][colFrom].getType() == PAWN && rowTo == state.enPassantSquare[0] && colTo == state.enPassantSquare[1]) {
+		board[rowFrom][colTo] = Piece();
 	}
 
-	if (state.board[rowFrom][colFrom].getType() == PAWN && absVal(rowTo - rowFrom) == 2) {
+	if (board[rowFrom][colFrom].getType() == PAWN && absVal(rowTo - rowFrom) == 2) {
 		state.enPassantSquare[0] = (rowFrom + rowTo) / 2;
 		state.enPassantSquare[1] = colFrom;
 	}
@@ -417,7 +416,7 @@ void Game::handlePromotion(int row, int col)
 {
 	int promotionRow = state.whiteMove ? 0 : 7;
 	COLORS color = state.whiteMove ? WHITE : BLACK;
-	if (state.board[row][col].getType() == PAWN && promotionRow == row)
+	if (board[row][col].getType() == PAWN && promotionRow == row)
 	{
 		wcout << "Promote pawn into: \n(1) Queen \n(2) Rook \n(3) Bishop \n(4) Knight\n";
 		int selectedPromotion;
@@ -439,16 +438,16 @@ void Game::handlePromotion(int row, int col)
 		switch (selectedPromotion)
 		{
 		case 1:
-			state.board[row][col] = Piece(color, QUEEN);
+			board[row][col] = Piece(color, QUEEN);
 			break;
 		case 2:
-			state.board[row][col] = Piece(color, ROOK);
+			board[row][col] = Piece(color, ROOK);
 			break;
 		case 3:
-			state.board[row][col] = Piece(color, BISHOP);
+			board[row][col] = Piece(color, BISHOP);
 			break;
 		case 4:
-			state.board[row][col] = Piece(color, KNIGHT);
+			board[row][col] = Piece(color, KNIGHT);
 			break;
 		default:
 			throw logic_error("Invalid promotion piece selected.");
@@ -464,6 +463,20 @@ void Game::saveGame()
 		throw runtime_error("Could not open save file.");
 	}
 	outFile.write(reinterpret_cast<const char*>(&state), sizeof(GameState));
+
+	for (size_t i = 0; i < BOARD_SIZE; i++)
+	{
+		for (size_t j = 0; j < BOARD_SIZE; j++)
+		{
+			Piece piece = board[i][j];
+			PIECES type = piece.getType();
+			COLORS color = piece.getColor();
+			outFile.write(reinterpret_cast<const char*>(&type), sizeof(int));
+			outFile.write(reinterpret_cast<const char*>(&color), sizeof(int));
+
+		}
+	}
+
 	outFile.write(reinterpret_cast<const char*>(&prevPos.positionsSize), sizeof(int));
 	for (int i = 0; i < prevPos.positionsSize; i++) {
 		outFile.write(prevPos.positions[i], BOARD_SIZE * BOARD_SIZE);
@@ -479,8 +492,22 @@ void Game::loadGame()
 		throw runtime_error("Could not open save file.");
 	}
 	inFile.read(reinterpret_cast<char*>(&state), sizeof(GameState));
+
+	for (size_t i = 0; i < BOARD_SIZE; i++)
+	{
+		for (size_t j = 0; j < BOARD_SIZE; j++)
+		{
+			PIECES type;
+			COLORS color;
+			inFile.read(reinterpret_cast<char*>(&type), sizeof(int));
+			inFile.read(reinterpret_cast<char*>(&color), sizeof(int));
+			board[i][j] = Piece(color, type);
+		}
+	}
+
 	inFile.read(reinterpret_cast<char*>(&prevPos.positionsSize), sizeof(int));
 	prevPos.positions = new char* [prevPos.positionsSize];
+	prevPos.positionsCounter = new int[prevPos.positionsSize];
 	for (int i = 0; i < prevPos.positionsSize; i++) {
 		prevPos.positions[i] = new char[BOARD_SIZE * BOARD_SIZE + 1];
 		inFile.read(prevPos.positions[i], BOARD_SIZE * BOARD_SIZE);
@@ -521,8 +548,8 @@ void Game::makeMove()
 
 	handleCastlingRelatedMove(rowFrom, colFrom, rowTo, colTo);
 	handleEnPassantRelatedMove(rowFrom, colFrom, rowTo, colTo);
-	state.board[rowTo][colTo] = state.board[rowFrom][colFrom];
-	state.board[rowFrom][colFrom] = Piece();
+	board[rowTo][colTo] = board[rowFrom][colFrom];
+	board[rowFrom][colFrom] = Piece();
 	handlePromotion(rowTo, colTo);
 	state.whiteMove = !state.whiteMove;
 	savePosition();

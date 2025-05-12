@@ -2,25 +2,26 @@
 #include "GameState.h"
 #include "utils.h"
 #include <iostream>
+#include "Piece.h"
 
 using namespace std;
 
-MoveValidator::MoveValidator(GameState& state) : state(state) {}
+MoveValidator::MoveValidator(Piece(&board)[BOARD_SIZE][BOARD_SIZE], GameState& state) : board(board), state(state) {}
 
 bool MoveValidator::isSquareEnemyPiece(int row, int col, PIECES type) {
 	if (row < 0 || row >= BOARD_SIZE || col < 0 || col >= BOARD_SIZE) {
 		return false;
 	}
 	COLORS enemyColor = state.whiteMove ? BLACK : WHITE;
-	return state.board[row][col].getType() == type && state.board[row][col].getColor() == enemyColor;
+	return board[row][col].getType() == type && board[row][col].getColor() == enemyColor;
 }
 
 bool MoveValidator::isKingCapturable(int row, int col)
 {
 	int kingRow = state.whiteMove ? state.whiteKingRow : state.blackKingRow;
 	int kingCol = state.whiteMove ? state.whiteKingCol : state.blackKingCol;
-	Piece king = state.board[kingRow][kingCol];
-	state.board[kingRow][kingCol] = Piece();
+	Piece king = board[kingRow][kingCol];
+	board[kingRow][kingCol] = Piece();
 
 	bool result = false;
 
@@ -59,7 +60,7 @@ bool MoveValidator::isKingCapturable(int row, int col)
 		int c = col + rookDirections[i][1];
 		while (r >= 0 && r < BOARD_SIZE && c >= 0 && c < BOARD_SIZE) {
 
-			if (!state.board[r][c].isEmpty())
+			if (!board[r][c].isEmpty())
 			{
 				if (isSquareEnemyPiece(r, c, QUEEN) || isSquareEnemyPiece(r, c, ROOK)) {
 					result = true;
@@ -79,7 +80,7 @@ bool MoveValidator::isKingCapturable(int row, int col)
 		int c = col + bishopDirections[i][1];
 		while (r >= 0 && r < BOARD_SIZE && c >= 0 && c < BOARD_SIZE) {
 
-			if (!state.board[r][c].isEmpty())
+			if (!board[r][c].isEmpty())
 			{
 				if (isSquareEnemyPiece(r, c, QUEEN) || isSquareEnemyPiece(r, c, BISHOP)) {
 					result = true;
@@ -90,13 +91,13 @@ bool MoveValidator::isKingCapturable(int row, int col)
 			c += bishopDirections[i][1];
 		}
 	}
-	state.board[kingRow][kingCol] = king;
+	board[kingRow][kingCol] = king;
 	return result;
 }
 
 void MoveValidator::validateCastle(int rowFrom, int colFrom, int rowTo, int colTo)
 {
-	Piece king = state.board[rowFrom][colFrom];
+	Piece king = board[rowFrom][colFrom];
 	COLORS color = king.getColor();
 
 	if (colFrom != 4)
@@ -112,7 +113,7 @@ void MoveValidator::validateCastle(int rowFrom, int colFrom, int rowTo, int colT
 			throw invalid_argument("Cannot castle long.");
 		}
 
-		if (!state.board[row][1].isEmpty() || !state.board[row][2].isEmpty() || !state.board[row][3].isEmpty()) {
+		if (!board[row][1].isEmpty() || !board[row][2].isEmpty() || !board[row][3].isEmpty()) {
 			throw invalid_argument("Cannot castle through pieces.");
 		}
 
@@ -128,7 +129,7 @@ void MoveValidator::validateCastle(int rowFrom, int colFrom, int rowTo, int colT
 			throw invalid_argument("Cannot castle short.");
 		}
 
-		if (!state.board[row][5].isEmpty() || !state.board[row][6].isEmpty()) {
+		if (!board[row][5].isEmpty() || !board[row][6].isEmpty()) {
 			throw invalid_argument("Cannot castle through pieces.");
 		}
 		if (isKingCapturable(row, 4) || isKingCapturable(row, 5) || isKingCapturable(row, 6)) {
@@ -181,7 +182,7 @@ void MoveValidator::validateSlidingMove(int rowFrom, int colFrom, int rowTo, int
 	int c = colFrom + colDir;
 
 	while (r != rowTo || c != colTo) {
-		if (!state.board[r][c].isEmpty()) {
+		if (!board[r][c].isEmpty()) {
 			throw invalid_argument("Invalid move. Path is blocked.");
 		}
 		r += rowDir;
@@ -208,7 +209,7 @@ void MoveValidator::validatePawnMove(int rowFrom, int colFrom, int rowTo, int co
 	int colDiff = colTo - colFrom;
 
 	if (absVal(colDiff) == 1 && rowDiff == direction) {
-		if (!state.board[rowTo][colTo].isEmpty()) {
+		if (!board[rowTo][colTo].isEmpty()) {
 			return;
 		}
 		if (state.enPassantSquare[0] == rowTo && state.enPassantSquare[1] == colTo)
@@ -219,7 +220,7 @@ void MoveValidator::validatePawnMove(int rowFrom, int colFrom, int rowTo, int co
 	}
 
 	if (colDiff == 0) {
-		if (!state.board[rowTo][colTo].isEmpty()) {
+		if (!board[rowTo][colTo].isEmpty()) {
 			throw invalid_argument("Invalid pawn move. Cannot capture vertically.");
 		}
 		if (rowDiff == direction) {
@@ -227,7 +228,7 @@ void MoveValidator::validatePawnMove(int rowFrom, int colFrom, int rowTo, int co
 		}
 		if (rowDiff == 2 * direction && rowFrom == startingRow) {
 			int midRow = rowFrom + direction;
-			if (!state.board[midRow][colFrom].isEmpty()) {
+			if (!board[midRow][colFrom].isEmpty()) {
 				throw invalid_argument("Invalid pawn move. Cannot jump over piece.");
 			}
 			return;
@@ -240,20 +241,20 @@ void MoveValidator::validatePawnMove(int rowFrom, int colFrom, int rowTo, int co
 
 void MoveValidator::validateKingSafety(int rowFrom, int colFrom, int rowTo, int colTo)
 {
-	Piece toPiece = state.board[rowTo][colTo];
-	state.board[rowTo][colTo] = state.board[rowFrom][colFrom];
-	state.board[rowFrom][colFrom] = Piece();
+	Piece toPiece = board[rowTo][colTo];
+	board[rowTo][colTo] = board[rowFrom][colFrom];
+	board[rowFrom][colFrom] = Piece();
 
 	int kingRow = state.whiteMove ? state.whiteKingRow : state.blackKingRow;
 	int kingCol = state.whiteMove ? state.whiteKingCol : state.blackKingCol;
 	if (isKingCapturable(kingRow, kingCol))
 	{
-		state.board[rowFrom][colFrom] = state.board[rowTo][colTo];
-		state.board[rowTo][colTo] = toPiece;
+		board[rowFrom][colFrom] = board[rowTo][colTo];
+		board[rowTo][colTo] = toPiece;
 		throw invalid_argument("Invalid move. Your king will be in danger.");
 	}
-	state.board[rowFrom][colFrom] = state.board[rowTo][colTo];
-	state.board[rowTo][colTo] = toPiece;
+	board[rowFrom][colFrom] = board[rowTo][colTo];
+	board[rowTo][colTo] = toPiece;
 }
 
 void MoveValidator::validateMove(int rowFrom, int colFrom, int rowTo, int colTo)
@@ -263,8 +264,8 @@ void MoveValidator::validateMove(int rowFrom, int colFrom, int rowTo, int colTo)
 		throw invalid_argument("Invalid move. Select 2 different squares.");
 	}
 
-	Piece fromPiece = state.board[rowFrom][colFrom];
-	Piece toPiece = state.board[rowTo][colTo];
+	Piece fromPiece = board[rowFrom][colFrom];
+	Piece toPiece = board[rowTo][colTo];
 
 	if (!((fromPiece.getColor() == WHITE && state.whiteMove) || (fromPiece.getColor() == BLACK && !state.whiteMove)))
 	{

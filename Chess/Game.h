@@ -1,10 +1,12 @@
 #pragma once
+#include "Piece.h"
 #include "GameState.h"
 #include "PreviousPositions.h"
 #include "MoveValidator.h"
 
 class Game {
 private:
+	Piece board[BOARD_SIZE][BOARD_SIZE];
 	GameState state;
 	PreviousPositions prevPos;
 	MoveValidator validator;
