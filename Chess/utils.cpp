@@ -1,5 +1,7 @@
 #include <iostream>
+#include <sstream>
 #include <windows.h>
+#include <chrono>
 
 #include "utils.h"
 #include "consts.h"
@@ -87,4 +89,32 @@ void fixCin()
 	cin.clear();
 	cin.sync();
 	cin.ignore();
+}
+
+size_t getCurrentTimeInMs()
+{
+	size_t time = GetTickCount64(); // windows
+	//size_t time = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch()).count(); // cross-platform
+	return time;
+}
+
+void selectOption(int& option, int from, int to)
+{
+	bool optionSelected = false;
+	while (!optionSelected) {
+		try {
+			cin >> option;
+			if (option < from || option > to)
+			{
+				ostringstream message;
+				message << "Select number between " << from << " and " << to << ":";
+				throw invalid_argument(message.str());
+			}
+			optionSelected = true;
+		}
+		catch (const exception& e) {
+			wcout << e.what() << endl;
+			fixCin();
+		}
+	}
 }

@@ -13,26 +13,27 @@ int main() {
 	_setmode(_fileno(stdout), _O_U16TEXT);
 	Game chessGame;
 	int option;
-	bool optionSelected = false;
-	bool error = false;
-	wcout << "Welcome to chess. Select one of the options below: \n(1) New Game \n(2) Load Game \n";
-	while (!optionSelected) {
-		try {
-			cin >> option;
-			if (option < 1 || option > 2)
-			{
-				throw invalid_argument("Select number between 1 and 2:");
-			}
-			optionSelected = true;
-		}
-		catch (const exception& e) {
-			wcout << e.what() << endl;
-			fixCin();
-		}
-	}
+	size_t totalTimeInMs = 0;
+	size_t timePerMoveInMs = 0;
+
+	wcout << L"Welcome to chess. Select one of the options below: \n(1) New Game \n(2) Load Game \n";
+	selectOption(option, 1, 2);
+
 	if (option == 1)
 	{
-
+		wcout << L"Select the type of the game: \n(1) No time control \n(2) Timed game \n";
+		selectOption(option, 1, 2);
+		if (option == 2)
+		{
+			int time;
+			wcout << L"Choose total time per player in minutes(1-300)\n";
+			selectOption(time, 1, 300);
+			totalTimeInMs = time * 60 * 1000;
+			wcout << L"Choose added time per move in seconds(0-300)\n";
+			selectOption(time, 0, 300);
+			timePerMoveInMs = time * 1000;
+		}
+		chessGame.setTimeControl(totalTimeInMs, timePerMoveInMs);
 	}
 	else {
 		try {
@@ -40,12 +41,8 @@ int main() {
 		}
 		catch (const exception& e) {
 			wcout << e.what() << endl;
-			error = true;
+			return 0;
 		}
-	}
-	if (error)
-	{
-		return 0;
 	}
 	chessGame.printBoard();
 	while (!chessGame.isGameOver()) {
@@ -55,8 +52,11 @@ int main() {
 				chessGame.makeMove();
 				validMove = true;
 			}
-			catch (invalid_argument e) {
+			catch (const invalid_argument& e) {
 				wcout << e.what() << endl;
+			}
+			catch (const logic_error& e) {
+				wcout << L"Logic error: " << e.what() << endl;
 			}
 		}
 		chessGame.printBoard();

@@ -9,3 +9,5 @@ void validateLocation(const char* location);
 int absVal(int number);
 bool compareStrs(const char* str1, const char* str2, bool caseSensitive = true);
 void fixCin();
+size_t getCurrentTimeInMs();
+void selectOption(int& option, int from, int to);

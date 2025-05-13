@@ -88,6 +88,8 @@ void Game::copyFrom(const Game& other) {
 		prevPos.positions = nullptr;
 		prevPos.positionsCounter = nullptr;
 	}
+
+	state.paused = true;
 }
 
 void Game::savePosition()
@@ -143,6 +145,8 @@ Game::Game() : validator(board, state) {
 	setupBackRank(WHITE, BOARD_SIZE - 1);
 
 	savePosition();
+
+	state.paused = true;
 }
 
 Game::Game(const Game& other) : validator(board, state) {
@@ -169,7 +173,7 @@ void Game::printCols(bool reverse)
 	wcout << L"  ";
 	for (size_t i = 0; i < BOARD_SIZE; i++)
 	{
-		char letter = reverse ? 'a' + BOARD_SIZE - i - 1 : 'a' + i;
+		wchar_t letter = reverse ? L'a' + BOARD_SIZE - i - 1 : L'a' + i;
 		wcout << letter << L" ";
 	}
 	wcout << endl;
@@ -177,7 +181,7 @@ void Game::printCols(bool reverse)
 
 void Game::printBoard()
 {
-	wcout << "\033[2J\033[H"; // clear console and start top left
+	wcout << L"\033[2J\033[H"; // clear console and start top left
 
 	bool reverse = !state.whiteMove;
 	printCols(reverse);
@@ -208,6 +212,10 @@ void Game::printBoard()
 	}
 
 	printCols(reverse);
+
+	size_t timeLeft = state.whiteMove ? state.whiteTimeInMs : state.blackTimeInMs;
+	wcout << L"Time left: " << timeLeft / 1000 / 60 << L":" << timeLeft / 1000 % 60 << (state.paused ? L" PAUSED" : L"") << endl;
+	wcout << (state.whiteMove ? L"White" : L"Black") << L"'s move (e.g. e2 e4): ";
 }
 
 bool Game::doesPieceHaveLegalMoves(int row, int col) {
@@ -229,7 +237,6 @@ bool Game::doesPieceHaveLegalMoves(int row, int col) {
 	}
 	return false;
 }
-
 
 bool Game::doesPlayerHaveLegalMoves()
 {
@@ -310,26 +317,31 @@ bool Game::hasThreefoldRepetition()
 	return false;
 }
 
-bool Game::isGameOver()
-{
+bool Game::isGameOver() {
 	if (!doesPlayerHaveLegalMoves())
 	{
 		int kingRow = state.whiteMove ? state.whiteKingRow : state.blackKingRow;
 		int kingCol = state.whiteMove ? state.whiteKingCol : state.blackKingCol;
 		if (validator.isKingCapturable(kingRow, kingCol)) {
-			wcout << (state.whiteMove ? "Black" : "White") << " wins!";
+			wcout << (state.whiteMove ? L"Black" : L"White") << L" wins!";
 		}
 		else {
-			wcout << "Game ends in a draw because " << (state.whiteMove ? "White" : "Black") << " has no legal moves.";
+			wcout << L"Game ends in a draw because " << (state.whiteMove ? L"White" : L"Black") << L" has no legal moves.";
 		}
 		return true;
 	}
 	if (!hasPiecesForMate()) {
-		wcout << "Game ends in a draw because of lack of pieces for checkmate.";
+		wcout << L"Game ends in a draw because of lack of pieces for checkmate.";
+		return true;
 	}
 	if (hasThreefoldRepetition())
 	{
-		wcout << "Game ends in a draw due to threefold repetition.";
+		wcout << L"Game ends in a draw due to threefold repetition.";
+		return true;
+	}
+	if (state.whiteTimeInMs <= 0 || state.blackTimeInMs <= 0)
+	{
+		wcout << (state.whiteTimeInMs <= 0 ? L"Black" : L"White") << L" wins due to timeout!";
 		return true;
 	}
 	return false;
@@ -418,23 +430,9 @@ void Game::handlePromotion(int row, int col)
 	COLORS color = state.whiteMove ? WHITE : BLACK;
 	if (board[row][col].getType() == PAWN && promotionRow == row)
 	{
-		wcout << "Promote pawn into: \n(1) Queen \n(2) Rook \n(3) Bishop \n(4) Knight\n";
+		wcout << L"Promote pawn into: \n(1) Queen \n(2) Rook \n(3) Bishop \n(4) Knight\n";
 		int selectedPromotion;
-		bool promotionSelected = false;
-		while (!promotionSelected) {
-			try {
-				cin >> selectedPromotion;
-				if (selectedPromotion < 1 || selectedPromotion > 4)
-				{
-					throw invalid_argument("Select number between 1 and 4:");
-				}
-				promotionSelected = true;
-			}
-			catch (const exception& e) {
-				wcout << e.what() << endl;
-				fixCin();
-			}
-		}
+		selectOption(selectedPromotion, 1, 4);
 		switch (selectedPromotion)
 		{
 		case 1:
@@ -454,6 +452,41 @@ void Game::handlePromotion(int row, int col)
 			break;
 		}
 	}
+}
+
+void Game::handleTimeControl()
+{
+	if (!state.timedGame) {
+		return;
+	}
+
+	size_t currentTime = getCurrentTimeInMs();
+	if (state.paused) {
+		state.paused = false;
+		lastMoveTimestamp = currentTime;
+		return;
+	}
+	size_t timeSpentInMs = currentTime - lastMoveTimestamp;
+	if (state.whiteMove) {
+		if (state.whiteTimeInMs < timeSpentInMs) {
+			state.whiteTimeInMs = 0;
+		}
+		else {
+			state.whiteTimeInMs -= timeSpentInMs;
+			state.whiteTimeInMs += state.incrementInMs;
+		}
+	}
+	else {
+		if (state.blackTimeInMs < timeSpentInMs) {
+			state.blackTimeInMs = 0;
+		}
+		else {
+			state.blackTimeInMs -= timeSpentInMs;
+			state.blackTimeInMs += state.incrementInMs;
+		}
+	}
+
+	lastMoveTimestamp = currentTime;
 }
 
 void Game::saveGame()
@@ -514,6 +547,7 @@ void Game::loadGame()
 		prevPos.positions[i][BOARD_SIZE * BOARD_SIZE] = '\0';
 		inFile.read(reinterpret_cast<char*>(&prevPos.positionsCounter[i]), sizeof(int));
 	}
+	state.paused = true;
 	inFile.close();
 }
 
@@ -522,17 +556,16 @@ void Game::makeMove()
 	const int BUFFER_SIZE = 128;
 	char moveFrom[BUFFER_SIZE];
 	char moveTo[BUFFER_SIZE];
-	wcout << (state.whiteMove ? "White" : "Black") << "'s move (e.g. e2 e4): ";
 	cin >> moveFrom;
 	while (compareStrs(moveFrom, "save", false))
 	{
 		saveGame();
-		wcout << "Game saved\n";
+		wcout << L"Game saved\n";
 		cin >> moveFrom;
 	}
 	if (compareStrs(moveFrom, "pause", false))
 	{
-		wcout << "pausing" << endl;
+		state.paused = true;
 		return;
 	}
 	cin >> moveTo;
@@ -551,7 +584,17 @@ void Game::makeMove()
 	board[rowTo][colTo] = board[rowFrom][colFrom];
 	board[rowFrom][colFrom] = Piece();
 	handlePromotion(rowTo, colTo);
+	handleTimeControl();
 	state.whiteMove = !state.whiteMove;
 	savePosition();
+}
+
+void Game::setTimeControl(size_t totalTimeInMs, size_t timePerMoveInMs)
+{
+	state.timedGame = true;
+	state.whiteTimeInMs = totalTimeInMs;
+	state.blackTimeInMs = totalTimeInMs;
+	state.incrementInMs = timePerMoveInMs;
+	state.paused = true;
 }
 

@@ -10,6 +10,7 @@ private:
 	GameState state;
 	PreviousPositions prevPos;
 	MoveValidator validator;
+	size_t lastMoveTimestamp;
 
 	void setupPawns(COLORS color, int row);
 	void setupBackRank(COLORS color, int row);
@@ -23,6 +24,7 @@ private:
 	void savePosition();
 	void saveGame();
 	void handlePromotion(int row, int col);
+	void handleTimeControl();
 	void printCols(bool reverse);
 	void freePositionsMemory();
 
@@ -35,5 +37,6 @@ public:
 	void printBoard();
 	bool isGameOver();
 	void makeMove();
+	void setTimeControl(size_t totalTimeInMs, size_t timePerMoveInMs);
 	void loadGame();
 };

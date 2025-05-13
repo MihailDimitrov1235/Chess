@@ -14,4 +14,10 @@ struct GameState {
 	int blackKingCol;
 
 	int enPassantSquare[2] = { -1, -1 };
+
+	size_t whiteTimeInMs = 0;
+	size_t blackTimeInMs = 0;
+	size_t incrementInMs = 0;
+	bool timedGame = false;
+	bool paused = true;
 };
