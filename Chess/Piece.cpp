@@ -13,6 +13,19 @@ void Piece::allocateMoves() {
 	}
 }
 
+void Piece::updateCode() {
+	if (color == WHITE) {
+		code = WHITE_PIECES[type];
+	}
+	else if (color == BLACK) {
+		code = BLACK_PIECES[type];
+	}
+	else {
+		code = L" ";
+	}
+}
+
+
 void Piece::copyFrom(const Piece& other) {
 	color = other.color;
 	type = other.type;
@@ -56,7 +69,7 @@ void Piece::resize(size_t newCapacity) {
 }
 
 
-void Piece::addMove(int move[COORDINATES]) {
+void Piece::addMove(const int move[COORDINATES]) {
 	if (movesSize >= movesCapacity) {
 		resize(movesCapacity * 2);
 	}
@@ -72,12 +85,7 @@ Piece::Piece() : color(NONE), type(EMPTY_SQUARE), code(L" "), movesSize(0), move
 
 Piece::Piece(COLORS color, PIECES type) : color(color), type(type), movesSize(0), movesCapacity(4), sliding(false) {
 	allocateMoves();
-	if (color == WHITE)
-		code = WHITE_PIECES[type];
-	else if (color == BLACK)
-		code = BLACK_PIECES[type];
-	else
-		code = L" ";
+	updateCode();
 }
 
 Piece::Piece(const Piece& other) {
@@ -110,20 +118,12 @@ size_t Piece::getMovesSize() const {
 
 void Piece::setType(PIECES type) {
 	this->type = type;
-	if (color == WHITE)
-		code = WHITE_PIECES[type];
-	else if (color == BLACK)
-		code = BLACK_PIECES[type];
+	updateCode();
 }
 
 void Piece::setColor(COLORS color) {
 	this->color = color;
-	if (type != EMPTY_SQUARE) {
-		if (color == WHITE)
-			code = WHITE_PIECES[type];
-		else if (color == BLACK)
-			code = BLACK_PIECES[type];
-	}
+	updateCode();
 }
 
 bool Piece::isEmpty() const {

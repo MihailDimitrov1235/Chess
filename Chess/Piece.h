@@ -4,19 +4,20 @@
 class Piece
 {
 private:
-	COLORS color;
-	PIECES type;
 	const wchar_t* code;
 	size_t movesSize;
 	size_t movesCapacity;
+	COLORS color;
+	PIECES type;
 	int** moves;
 	void copyFrom(const Piece& other);
 	void free();
 	void resize(size_t newCapacity);
 	void allocateMoves();
+	void updateCode();
 protected:
 	bool sliding;
-	void addMove(int move[COORDINATES]);
+	void addMove(const int move[COORDINATES]);
 public:
 	Piece();
 	Piece(COLORS color, PIECES type);

@@ -6,12 +6,13 @@
 #include "consts.h"
 #include "Game.h"
 #include "utils.h"
+#include "Queen.h"
 
 using namespace std;
 
 int main() {
 	_setmode(_fileno(stdout), _O_U16TEXT);
-	Game chessGame;
+	/*Game chessGame;
 	int option;
 	size_t totalTimeInMs = 0;
 	size_t timePerMoveInMs = 0;
@@ -60,5 +61,11 @@ int main() {
 			}
 		}
 		chessGame.printBoard();
+	}*/
+
+	Piece* p = new Queen(WHITE);
+	int** moves = p->getMoves();
+	for (size_t i = 0; i < p->getMovesSize(); i++) {
+		wcout << moves[i][0] << " " << moves[i][1] << endl;
 	}
 }

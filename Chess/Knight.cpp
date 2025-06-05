@@ -2,7 +2,7 @@
 
 Knight::Knight(COLORS color) : Piece(color, KNIGHT) {
 	sliding = false;
-	int knightMoves[8][2] = {
+	const int knightMoves[8][2] = {
 		{  2,  1 }, {  2, -1 },
 		{ -2,  1 }, { -2, -1 },
 		{  1,  2 }, {  1, -2 },
