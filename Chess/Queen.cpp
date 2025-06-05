@@ -2,7 +2,9 @@
 #include <iostream>
 using namespace std;
 
-Queen::Queen(COLORS color) :Piece(color, QUEEN), Rook(color), Bishop(color) { }
+Queen::Queen(COLORS color) :Piece(color, QUEEN), Rook(color), Bishop(color) {
+	setType(QUEEN);
+}
 
 Piece* Queen::clone() const {
 	return new Queen(*this);

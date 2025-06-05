@@ -155,6 +155,8 @@ Game::Game() : validator(board, state) {
 	state.blackKingRow = 0;
 	state.blackKingCol = 4;
 
+	state.timedGame = false;
+
 	for (int row = 2; row < BOARD_SIZE - 2; row++) {
 		for (int col = 0; col < BOARD_SIZE; col++) {
 			board[row][col] = new Piece();
@@ -234,8 +236,11 @@ void Game::printBoard()
 
 	printCols(reverse);
 
-	size_t timeLeft = state.whiteMove ? state.whiteTimeInMs : state.blackTimeInMs;
-	wcout << L"Time left: " << timeLeft / 1000 / 60 << L":" << timeLeft / 1000 % 60 << (state.paused ? L" PAUSED" : L"") << endl;
+	if (state.timedGame)
+	{
+		size_t timeLeft = state.whiteMove ? state.whiteTimeInMs : state.blackTimeInMs;
+		wcout << L"Time left: " << timeLeft / 1000 / 60 << L":" << timeLeft / 1000 % 60 << (state.paused ? L" PAUSED" : L"") << endl;
+	}
 	wcout << (state.whiteMove ? L"White" : L"Black") << L"'s move (e.g. e2 e4): ";
 }
 
@@ -365,7 +370,7 @@ bool Game::isGameOver() {
 		wcout << L"Game ends in a draw due to threefold repetition.";
 		return true;
 	}
-	if (state.whiteTimeInMs <= 0 || state.blackTimeInMs <= 0)
+	if (state.timedGame && (state.whiteTimeInMs <= 0 || state.blackTimeInMs <= 0))
 	{
 		wcout << (state.whiteTimeInMs <= 0 ? L"Black" : L"White") << L" wins due to timeout!";
 		return true;

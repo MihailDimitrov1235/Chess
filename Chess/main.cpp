@@ -32,8 +32,8 @@ int main() {
 			wcout << L"Choose added time per move in seconds(0-300)\n";
 			selectOption(time, 0, 300);
 			timePerMoveInMs = time * 1000;
+			chessGame.setTimeControl(totalTimeInMs, timePerMoveInMs);
 		}
-		chessGame.setTimeControl(totalTimeInMs, timePerMoveInMs);
 	}
 	else {
 		try {
