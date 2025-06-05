@@ -1,5 +1,9 @@
 #include "Piece.h"
 #include "consts.h"
+#include "GameState.h"
+#include <iostream>
+
+using namespace std;
 
 void Piece::allocateMoves() {
 	if (movesCapacity > 0) {
@@ -136,4 +140,8 @@ bool Piece::isEmpty() const {
 
 bool Piece::canAttack(int fromRow, int fromCol, int toRow, int toCol, Piece* const board[BOARD_SIZE][BOARD_SIZE]) const {
 	return false;
+}
+
+void Piece::validateMove(int fromRow, int fromCol, int toRow, int toCol, Piece* const board[BOARD_SIZE][BOARD_SIZE]) const {
+	throw invalid_argument("Square is empty.");
 }

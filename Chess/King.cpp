@@ -1,5 +1,8 @@
 #include "King.h"
+#include <iostream>
 #include "utils.h"
+
+using namespace std;
 
 King::King(COLORS color) : Piece(color, KING) {
 	sliding = false;
@@ -24,4 +27,10 @@ bool King::canAttack(int fromRow, int fromCol, int toRow, int toCol, Piece* cons
 	int rowDiff = absVal(fromRow - toRow);
 	int colDiff = absVal(fromCol - toCol);
 	return (rowDiff <= 1 && colDiff <= 1 && (rowDiff + colDiff != 0));
+}
+
+void King::validateMove(int fromRow, int fromCol, int toRow, int toCol, Piece* const board[BOARD_SIZE][BOARD_SIZE]) const {
+	if (!canAttack(fromRow, fromCol, toRow, toCol, board)) {
+		throw invalid_argument("Invalid King move.");
+	}
 }

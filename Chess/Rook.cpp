@@ -1,4 +1,6 @@
 #include "Rook.h"
+#include <iostream>
+using namespace std;
 
 Rook::Rook(COLORS color) {
 	setColor(color);
@@ -33,4 +35,10 @@ bool Rook::canAttack(int fromRow, int fromCol, int toRow, int toCol, Piece* cons
 		c += colDir;
 	}
 	return true;
+}
+
+void Rook::validateMove(int fromRow, int fromCol, int toRow, int toCol, Piece* const board[BOARD_SIZE][BOARD_SIZE]) const {
+	if (!canAttack(fromRow, fromCol, toRow, toCol, board)) {
+		throw invalid_argument("Invalid Rook move.");
+	}
 }

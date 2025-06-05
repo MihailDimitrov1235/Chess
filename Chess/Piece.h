@@ -38,4 +38,7 @@ public:
 	bool isEmpty() const;
 
 	virtual bool canAttack(int fromRow, int fromCol, int toRow, int toCol, Piece* const board[BOARD_SIZE][BOARD_SIZE]) const;
+	virtual void validateMove(int fromRow, int fromCol, int toRow, int toCol,
+		Piece* const board[BOARD_SIZE][BOARD_SIZE]) const;
+
 };

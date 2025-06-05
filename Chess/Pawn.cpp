@@ -1,5 +1,7 @@
 #include "Pawn.h"
 #include "utils.h"
+#include <iostream>
+using namespace std;
 
 Pawn::Pawn(COLORS color) : Piece(color, PAWN) {
 	sliding = false;
@@ -30,4 +32,40 @@ bool Pawn::canAttack(int fromRow, int fromCol, int toRow, int toCol, Piece* cons
 
 	return false;
 }
+
+void Pawn::validateMove(int fromRow, int fromCol, int toRow, int toCol, Piece* const board[BOARD_SIZE][BOARD_SIZE]) const
+{
+	COLORS enemyColor = getColor() == WHITE ? BLACK : WHITE;
+	int direction = (getColor() == WHITE) ? -1 : 1;
+	int startRow = (getColor() == WHITE) ? 6 : 1;
+	int rowDiff = toRow - fromRow;
+	int colDiff = toCol - fromCol;
+
+	if (abs(colDiff) == 1 && rowDiff == direction) {
+		if (board[toRow][toCol]->getColor() == enemyColor) {
+			return;
+		}
+		throw invalid_argument("Invalid pawn capture.");
+	}
+
+	if (colDiff == 0) {
+		if (rowDiff == direction) {
+			if (!board[toRow][toCol]->isEmpty()) {
+				throw invalid_argument("Cannot move into occupied square.");
+			}
+			return;
+		}
+
+		if (rowDiff == 2 * direction && fromRow == startRow) {
+			int intermediateRow = fromRow + direction;
+			if (!board[intermediateRow][fromCol]->isEmpty() || !board[toRow][toCol]->isEmpty()) {
+				throw invalid_argument("Cannot jump over or into occupied square.");
+			}
+			return;
+		}
+	}
+
+	throw invalid_argument("Invalid pawn move.");
+}
+
 

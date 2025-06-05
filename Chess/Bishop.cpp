@@ -1,5 +1,8 @@
+#include <iostream>
 #include "Bishop.h"
 #include "utils.h"
+
+using namespace std;
 
 Bishop::Bishop(COLORS color) : Piece(color, BISHOP) {
 	setColor(color);
@@ -32,5 +35,11 @@ bool Bishop::canAttack(int fromRow, int fromCol, int toRow, int toCol, Piece* co
 		c += colDir;
 	}
 	return true;
+}
+
+void Bishop::validateMove(int fromRow, int fromCol, int toRow, int toCol, Piece* const board[BOARD_SIZE][BOARD_SIZE]) const {
+	if (!canAttack(fromRow, fromCol, toRow, toCol, board)) {
+		throw invalid_argument("Invalid Bishop move.");
+	}
 }
 
