@@ -12,7 +12,7 @@ Pawn::Pawn(COLORS color) : Piece(color, PAWN) {
 
 	for (size_t i = 0; i < 4; i++) {
 		int move[2];
-		move[0] = color == WHITE ? pawnMoves[i][0] : -pawnMoves[i][0];
+		move[0] = color == WHITE ? -pawnMoves[i][0] : pawnMoves[i][0];
 		move[1] = pawnMoves[i][1];
 		addMove(move);
 	}

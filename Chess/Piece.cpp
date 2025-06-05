@@ -116,6 +116,11 @@ COLORS Piece::getColor() const { return color; }
 PIECES Piece::getType() const { return type; }
 const wchar_t* Piece::getCode() const { return code; }
 
+bool Piece::getSliding() const
+{
+	return sliding;
+}
+
 int** Piece::getMoves() const {
 	return moves;
 }

@@ -29,6 +29,7 @@ public:
 	COLORS getColor() const;
 	PIECES getType() const;
 	const wchar_t* getCode() const;
+	bool getSliding() const;
 	int** getMoves() const;
 	size_t getMovesSize() const;
 

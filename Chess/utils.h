@@ -12,3 +12,4 @@ void fixCin();
 size_t getCurrentTimeInMs();
 void selectOption(int& option, int from, int to);
 void swap(Piece*& p1, Piece*& p2);
+Piece* createPiece(COLORS color, PIECES type);

@@ -2,6 +2,13 @@
 #include <sstream>
 #include <windows.h>
 #include <chrono>
+#include "King.h"
+#include "Queen.h"
+#include "Bishop.h"
+#include "Pawn.h"
+#include "Knight.h"
+#include "Rook.h"
+
 
 #include "utils.h"
 #include "consts.h"
@@ -125,4 +132,18 @@ void swap(Piece*& p1, Piece*& p2) {
 	p1 = p2->clone();
 	delete p2;
 	p2 = temp;
+}
+
+Piece* createPiece(COLORS color, PIECES type) {
+	switch (type) {
+	case KING:   return new King(color);
+	case QUEEN:  return new Queen(color);
+	case ROOK:   return new Rook(color);
+	case BISHOP: return new Bishop(color);
+	case KNIGHT: return new Knight(color);
+	case PAWN:   return new Pawn(color);
+	case NONE:  return new Piece();
+	default:
+		throw invalid_argument("Unknown piece type in save file.");
+	}
 }
