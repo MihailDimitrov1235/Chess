@@ -11,3 +11,4 @@ bool compareStrs(const char* str1, const char* str2, bool caseSensitive = true);
 void fixCin();
 size_t getCurrentTimeInMs();
 void selectOption(int& option, int from, int to);
+void swap(Piece*& p1, Piece*& p2);

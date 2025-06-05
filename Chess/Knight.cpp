@@ -1,4 +1,5 @@
 #include "Knight.h"
+#include "utils.h"
 
 Knight::Knight(COLORS color) : Piece(color, KNIGHT) {
 	sliding = false;
@@ -13,3 +14,14 @@ Knight::Knight(COLORS color) : Piece(color, KNIGHT) {
 		addMove(knightMoves[i]);
 	}
 }
+
+Piece* Knight::clone() const {
+	return new Knight(*this);
+}
+
+bool Knight::canAttack(int fromRow, int fromCol, int toRow, int toCol, Piece* const board[BOARD_SIZE][BOARD_SIZE]) const {
+	int rowDiff = absVal(toRow - fromRow);
+	int colDiff = absVal(toCol - fromCol);
+	return (rowDiff == 2 && colDiff == 1) || (rowDiff == 1 && colDiff == 2);
+}
+

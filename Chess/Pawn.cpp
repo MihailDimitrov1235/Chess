@@ -1,4 +1,5 @@
 #include "Pawn.h"
+#include "utils.h"
 
 Pawn::Pawn(COLORS color) : Piece(color, PAWN) {
 	sliding = false;
@@ -14,3 +15,19 @@ Pawn::Pawn(COLORS color) : Piece(color, PAWN) {
 		addMove(move);
 	}
 }
+
+Piece* Pawn::clone() const {
+	return new Pawn(*this);
+}
+
+bool Pawn::canAttack(int fromRow, int fromCol, int toRow, int toCol, Piece* const board[BOARD_SIZE][BOARD_SIZE]) const {
+	int direction = (getColor() == WHITE) ? -1 : 1;
+
+	if (toRow - fromRow == direction && absVal(toCol - fromCol) == 1) {
+		Piece* target = board[toRow][toCol];
+		return !target->isEmpty() && target->getColor() != getColor();
+	}
+
+	return false;
+}
+

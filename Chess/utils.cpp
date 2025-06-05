@@ -118,3 +118,11 @@ void selectOption(int& option, int from, int to)
 		}
 	}
 }
+
+void swap(Piece*& p1, Piece*& p2) {
+	Piece* temp = p1->clone();
+	delete p1;
+	p1 = p2->clone();
+	delete p2;
+	p2 = temp;
+}

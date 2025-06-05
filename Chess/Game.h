@@ -6,7 +6,7 @@
 
 class Game {
 private:
-	Piece board[BOARD_SIZE][BOARD_SIZE];
+	Piece* board[BOARD_SIZE][BOARD_SIZE];
 	GameState state;
 	PreviousPositions prevPos;
 	MoveValidator validator;
@@ -26,8 +26,9 @@ private:
 	void handlePromotion(int row, int col);
 	void handleTimeControl();
 	void printCols(bool reverse);
-	void freePositionsMemory();
 
+	void freePositionsMemory();
+	void free();
 	void copyFrom(const Game& other);
 public:
 	Game();

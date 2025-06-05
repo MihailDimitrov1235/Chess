@@ -5,7 +5,7 @@
 
 class MoveValidator {
 private:
-	Piece(&board)[BOARD_SIZE][BOARD_SIZE];
+	Piece* (&board)[BOARD_SIZE][BOARD_SIZE];
 	const GameState& state;
 
 	bool isSquareEnemyPiece(int row, int col, PIECES type);
@@ -17,9 +17,9 @@ private:
 	void validateKingSafety(int rowFrom, int colFrom, int rowTo, int colTo);
 
 public:
-	MoveValidator(Piece(&board)[BOARD_SIZE][BOARD_SIZE], GameState& state);
+	MoveValidator(Piece* (&board)[BOARD_SIZE][BOARD_SIZE], GameState& state);
 
 	void validateMove(int rowFrom, int colFrom, int rowTo, int colTo);
-	bool isKingCapturable(int row, int col);
+	bool isKingCapturableAt(int row, int col);
 
 };

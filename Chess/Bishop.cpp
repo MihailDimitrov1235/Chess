@@ -1,4 +1,5 @@
 #include "Bishop.h"
+#include "utils.h"
 
 Bishop::Bishop(COLORS color) : Piece(color, BISHOP) {
 	setColor(color);
@@ -13,3 +14,23 @@ Bishop::Bishop(COLORS color) : Piece(color, BISHOP) {
 		addMove(bishopMoves[i]);
 	}
 }
+
+Piece* Bishop::clone() const {
+	return new Bishop(*this);
+}
+
+bool Bishop::canAttack(int fromRow, int fromCol, int toRow, int toCol, Piece* const board[BOARD_SIZE][BOARD_SIZE]) const {
+	if (absVal(toRow - fromRow) != absVal(toCol - fromCol)) {
+		return false;
+	}
+	int rowDir = (toRow - fromRow) > 0 ? 1 : -1;
+	int colDir = (toCol - fromCol) > 0 ? 1 : -1;
+	int r = fromRow + rowDir, c = fromCol + colDir;
+	while (r != toRow && c != toCol) {
+		if (!board[r][c]->isEmpty()) return false;
+		r += rowDir;
+		c += colDir;
+	}
+	return true;
+}
+

@@ -6,102 +6,47 @@
 
 using namespace std;
 
-MoveValidator::MoveValidator(Piece(&board)[BOARD_SIZE][BOARD_SIZE], GameState& state) : board(board), state(state) {}
+MoveValidator::MoveValidator(Piece* (&board)[BOARD_SIZE][BOARD_SIZE], GameState& state) : board(board), state(state) {}
 
 bool MoveValidator::isSquareEnemyPiece(int row, int col, PIECES type) {
 	if (row < 0 || row >= BOARD_SIZE || col < 0 || col >= BOARD_SIZE) {
 		return false;
 	}
 	COLORS enemyColor = state.whiteMove ? BLACK : WHITE;
-	return board[row][col].getType() == type && board[row][col].getColor() == enemyColor;
+	return board[row][col]->getType() == type && board[row][col]->getColor() == enemyColor;
 }
 
-bool MoveValidator::isKingCapturable(int row, int col)
+bool MoveValidator::isKingCapturableAt(int row, int col)
 {
 	int kingRow = state.whiteMove ? state.whiteKingRow : state.blackKingRow;
 	int kingCol = state.whiteMove ? state.whiteKingCol : state.blackKingCol;
-	Piece king = board[kingRow][kingCol];
-	board[kingRow][kingCol] = Piece();
+	Piece* king = board[kingRow][kingCol];
 
-	bool result = false;
+	swap(king, board[row][col]);
+	COLORS enemyColor = state.whiteMove ? BLACK : WHITE;
 
-	// check for enemy king
-	const int kingOffsets[8][2] = { {1, 1}, {0, 1}, {-1, 1}, {1, 0}, {-1, 0}, {1, -1}, {0, -1}, {-1, -1} };
-	for (size_t i = 0; i < 8; i++) {
-		int r = row + kingOffsets[i][0];
-		int c = col + kingOffsets[i][1];
-		if (isSquareEnemyPiece(r, c, KING)) {
-			result = true;
-		}
-	}
-
-	// check for enemy pawns
-	const int pawnDirection = state.whiteMove ? -1 : 1;
-	if (isSquareEnemyPiece(row + pawnDirection, col + 1, PAWN) || isSquareEnemyPiece(row + pawnDirection, col - 1, PAWN)) {
-		result = true;
-	}
-
-	//check for enemy knight
-	const int knightOffsets[8][2] = { {2, 1}, {1, 2}, {-1, 2}, {-2, 1}, {2, -1}, {1, -2}, {-1, -2}, {-2, -1} };
-	for (size_t i = 0; i < 8; i++)
+	for (size_t i = 0; i < BOARD_SIZE; i++)
 	{
-		int r = row + knightOffsets[i][0];
-		int c = col + knightOffsets[i][1];
-		if (isSquareEnemyPiece(r, c, KNIGHT)) {
-			result = true;
-		}
-	}
-
-	//check for rooks/queens
-	const int rookDirections[4][2] = { {1, 0}, {-1, 0}, {0, 1}, {0, -1} };
-	for (size_t i = 0; i < 4; i++)
-	{
-		int r = row + rookDirections[i][0];
-		int c = col + rookDirections[i][1];
-		while (r >= 0 && r < BOARD_SIZE && c >= 0 && c < BOARD_SIZE) {
-
-			if (!board[r][c].isEmpty())
-			{
-				if (isSquareEnemyPiece(r, c, QUEEN) || isSquareEnemyPiece(r, c, ROOK)) {
-					result = true;
-				}
-				break;
+		for (size_t j = 0; j < BOARD_SIZE; j++) {
+			if (board[i][j]->getColor() == enemyColor && board[i][j]->canAttack(i, j, row, col, board)) {
+				return true;
 			}
-			r += rookDirections[i][0];
-			c += rookDirections[i][1];
 		}
 	}
 
-	//check for bishops/queens
-	const int bishopDirections[4][2] = { {1, 1}, {-1, 1}, {1, -1}, {-1, -1} };
-	for (size_t i = 0; i < 4; i++)
-	{
-		int r = row + bishopDirections[i][0];
-		int c = col + bishopDirections[i][1];
-		while (r >= 0 && r < BOARD_SIZE && c >= 0 && c < BOARD_SIZE) {
-
-			if (!board[r][c].isEmpty())
-			{
-				if (isSquareEnemyPiece(r, c, QUEEN) || isSquareEnemyPiece(r, c, BISHOP)) {
-					result = true;
-				}
-				break;
-			}
-			r += bishopDirections[i][0];
-			c += bishopDirections[i][1];
-		}
-	}
+	swap(king, board[row][col]);
 	board[kingRow][kingCol] = king;
-	return result;
+	return false;
 }
 
 void MoveValidator::validateCastle(int rowFrom, int colFrom, int rowTo, int colTo)
 {
-	Piece king = board[rowFrom][colFrom];
-	COLORS color = king.getColor();
+	Piece* king = board[rowFrom][colFrom];
+	COLORS color = king->getColor();
 
-	if (colFrom != 4)
+	if (colFrom != 4) {
 		throw invalid_argument("Invalid castle: King not on starting square.");
+	}
 
 	bool isWhite = (color == WHITE);
 	int row = isWhite ? 7 : 0;
@@ -113,11 +58,11 @@ void MoveValidator::validateCastle(int rowFrom, int colFrom, int rowTo, int colT
 			throw invalid_argument("Cannot castle long.");
 		}
 
-		if (!board[row][1].isEmpty() || !board[row][2].isEmpty() || !board[row][3].isEmpty()) {
+		if (!board[row][1]->isEmpty() || !board[row][2]->isEmpty() || !board[row][3]->isEmpty()) {
 			throw invalid_argument("Cannot castle through pieces.");
 		}
 
-		if (isKingCapturable(row, 4) || isKingCapturable(row, 3) || isKingCapturable(row, 2)) {
+		if (isKingCapturableAt(row, 4) || isKingCapturableAt(row, 3) || isKingCapturableAt(row, 2)) {
 			throw invalid_argument("Cannot castle through or into check.");
 		}
 	}
@@ -129,10 +74,10 @@ void MoveValidator::validateCastle(int rowFrom, int colFrom, int rowTo, int colT
 			throw invalid_argument("Cannot castle short.");
 		}
 
-		if (!board[row][5].isEmpty() || !board[row][6].isEmpty()) {
+		if (!board[row][5]->isEmpty() || !board[row][6]->isEmpty()) {
 			throw invalid_argument("Cannot castle through pieces.");
 		}
-		if (isKingCapturable(row, 4) || isKingCapturable(row, 5) || isKingCapturable(row, 6)) {
+		if (isKingCapturableAt(row, 4) || isKingCapturableAt(row, 5) || isKingCapturableAt(row, 6)) {
 			throw invalid_argument("Cannot castle through or into check.");
 		}
 	}

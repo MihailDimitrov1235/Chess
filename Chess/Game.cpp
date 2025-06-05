@@ -6,24 +6,31 @@
 #include "Game.h"
 #include "consts.h"
 #include "utils.h"
+#include "Rook.h"
+#include "King.h"
+#include "Queen.h"
+#include "Bishop.h"
+#include "Knight.h"
+#include "Pawn.h"
+
 
 using namespace std;
 
 void Game::setupBackRank(COLORS color, int row) {
-	board[row][0] = Piece(color, ROOK);
-	board[row][1] = Piece(color, KNIGHT);
-	board[row][2] = Piece(color, BISHOP);
-	board[row][3] = Piece(color, QUEEN);
-	board[row][4] = Piece(color, KING);
-	board[row][5] = Piece(color, BISHOP);
-	board[row][6] = Piece(color, KNIGHT);
-	board[row][7] = Piece(color, ROOK);
+	board[row][0] = new Rook(color);
+	board[row][1] = new Knight(color);
+	board[row][2] = new Bishop(color);
+	board[row][3] = new Queen(color);
+	board[row][4] = new King(color);
+	board[row][5] = new Bishop(color);
+	board[row][6] = new Knight(color);
+	board[row][7] = new Rook(color);
 }
 
 void Game::setupPawns(COLORS color, int row)
 {
 	for (int col = 0; col < BOARD_SIZE; col++) {
-		board[row][col] = Piece(color, PAWN);
+		board[row][col] = new Pawn(color);
 	}
 }
 
@@ -33,9 +40,9 @@ char* Game::encodeBoard()
 	for (int row = 0; row < BOARD_SIZE; row++) {
 		for (int col = 0; col < BOARD_SIZE; col++) {
 			int index = row * BOARD_SIZE + col;
-			Piece piece = board[row][col];
-			char symbol = piece.getType() + 'A';
-			result[index] = piece.getColor() == WHITE ? symbol : toLower(symbol);
+			Piece* piece = board[row][col];
+			char symbol = piece->getType() + 'A';
+			result[index] = piece->getColor() == WHITE ? symbol : toLower(symbol);
 		}
 	}
 	result[BOARD_SIZE * BOARD_SIZE] = '\0';
@@ -52,12 +59,27 @@ void Game::freePositionsMemory() {
 	prevPos.positionsSize = 0;
 }
 
+void Game::free() {
+	freePositionsMemory();
+	for (size_t i = 0; i < BOARD_SIZE; i++) {
+		for (size_t j = 0; j < BOARD_SIZE; j++) {
+			delete board[i][j];
+		}
+	}
+}
+
 void Game::copyFrom(const Game& other) {
 	for (int row = 0; row < BOARD_SIZE; row++) {
 		for (int col = 0; col < BOARD_SIZE; col++) {
-			board[row][col] = other.board[row][col];
+			if (other.board[row][col] != nullptr) {
+				board[row][col] = other.board[row][col]->clone();
+			}
+			else {
+				board[row][col] = nullptr;
+			}
 		}
 	}
+
 
 	state.whiteMove = other.state.whiteMove;
 	state.whiteCanCastleLong = other.state.whiteCanCastleLong;
@@ -157,15 +179,14 @@ Game& Game::operator=(const Game& other)
 {
 	if (this != &other)
 	{
-		freePositionsMemory();
+		free();
 		copyFrom(other);
 	}
 	return *this;
 }
 
-Game::~Game()
-{
-	freePositionsMemory();
+Game::~Game() {
+	free();
 }
 
 void Game::printCols(bool reverse)

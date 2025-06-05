@@ -23,6 +23,7 @@ public:
 	Piece(COLORS color, PIECES type);
 	Piece(const Piece& other);
 	Piece& operator=(const Piece& other);
+	virtual Piece* clone() const;
 	virtual ~Piece();
 
 	COLORS getColor() const;
@@ -35,4 +36,6 @@ public:
 	void setColor(COLORS color);
 
 	bool isEmpty() const;
+
+	virtual bool canAttack(int fromRow, int fromCol, int toRow, int toCol, Piece* const board[BOARD_SIZE][BOARD_SIZE]) const;
 };

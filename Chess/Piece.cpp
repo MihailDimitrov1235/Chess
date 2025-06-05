@@ -100,6 +100,10 @@ Piece& Piece::operator=(const Piece& other) {
 	return *this;
 }
 
+Piece* Piece::clone() const {
+	return new Piece(*this);
+}
+
 Piece::~Piece() {
 	free();
 }
@@ -128,4 +132,8 @@ void Piece::setColor(COLORS color) {
 
 bool Piece::isEmpty() const {
 	return color == NONE || type == EMPTY_SQUARE || movesSize == 0;
+}
+
+bool Piece::canAttack(int fromRow, int fromCol, int toRow, int toCol, Piece* const board[BOARD_SIZE][BOARD_SIZE]) const {
+	return false;
 }
