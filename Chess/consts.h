@@ -1,5 +1,6 @@
 #pragma once
 const int BOARD_SIZE = 8;
+const int COORDINATES = 2;
 
 extern const wchar_t* WHITE_PIECES[];
 extern const wchar_t* BLACK_PIECES[];

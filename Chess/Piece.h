@@ -7,14 +7,28 @@ private:
 	COLORS color;
 	PIECES type;
 	const wchar_t* code;
-
+	size_t movesSize;
+	size_t movesCapacity;
+	int** moves;
+	void copyFrom(const Piece& other);
+	void free();
+	void resize(size_t newCapacity);
+	void allocateMoves();
+protected:
+	bool sliding;
+	void addMove(int move[COORDINATES]);
 public:
 	Piece();
 	Piece(COLORS color, PIECES type);
+	Piece(const Piece& other);
+	Piece& operator=(const Piece& other);
+	virtual ~Piece();
 
 	COLORS getColor() const;
 	PIECES getType() const;
 	const wchar_t* getCode() const;
+	int** getMoves() const;
+	size_t getMovesSize() const;
 
 	void setType(PIECES type);
 	void setColor(COLORS color);
