@@ -29,7 +29,7 @@ void Game::setupBackRank(COLORS color, int row) {
 
 void Game::setupPawns(COLORS color, int row)
 {
-	for (int col = 0; col < BOARD_SIZE; col++) {
+	for (size_t col = 0; col < BOARD_SIZE; col++) {
 		board[row][col] = new Pawn(color);
 	}
 }
@@ -37,8 +37,8 @@ void Game::setupPawns(COLORS color, int row)
 char* Game::encodeBoard()
 {
 	char* result = new char[BOARD_SIZE * BOARD_SIZE + 1];
-	for (int row = 0; row < BOARD_SIZE; row++) {
-		for (int col = 0; col < BOARD_SIZE; col++) {
+	for (size_t row = 0; row < BOARD_SIZE; row++) {
+		for (size_t col = 0; col < BOARD_SIZE; col++) {
 			int index = row * BOARD_SIZE + col;
 			Piece* piece = board[row][col];
 			char symbol = piece->getType() + 'A';
@@ -69,8 +69,8 @@ void Game::free() {
 }
 
 void Game::copyFrom(const Game& other) {
-	for (int row = 0; row < BOARD_SIZE; row++) {
-		for (int col = 0; col < BOARD_SIZE; col++) {
+	for (size_t row = 0; row < BOARD_SIZE; row++) {
+		for (size_t col = 0; col < BOARD_SIZE; col++) {
 			if (other.board[row][col] != nullptr) {
 				board[row][col] = other.board[row][col]->clone();
 			}
@@ -189,6 +189,41 @@ Game& Game::operator=(const Game& other)
 
 Game::~Game() {
 	free();
+}
+
+void Game::chooseGamemode() {
+	int option;
+	size_t totalTimeInMs = 0;
+	size_t timePerMoveInMs = 0;
+
+	wcout << L"Welcome to chess. Select one of the options below: \n(1) New Game \n(2) Load Game \n";
+	selectOption(option, 1, 2);
+
+	if (option == 1)
+	{
+		wcout << L"Select the type of the game: \n(1) No time control \n(2) Timed game \n";
+		selectOption(option, 1, 2);
+		if (option == 2)
+		{
+			int time;
+			wcout << L"Choose total time per player in minutes(1-300)\n";
+			selectOption(time, 1, 300);
+			totalTimeInMs = time * 60 * 1000;
+			wcout << L"Choose added time per move in seconds(0-300)\n";
+			selectOption(time, 0, 300);
+			timePerMoveInMs = time * 1000;
+			setTimeControl(totalTimeInMs, timePerMoveInMs);
+		}
+	}
+	else {
+		try {
+			loadGame();
+		}
+		catch (const exception& e) {
+			wcout << e.what() << endl;
+			return;
+		}
+	}
 }
 
 void Game::printCols(bool reverse)
@@ -579,6 +614,27 @@ void Game::loadGame()
 	}
 	state.paused = true;
 	inFile.close();
+}
+
+void Game::startGame() {
+	chooseGamemode();
+	printBoard();
+	while (!isGameOver()) {
+		bool validMove = false;
+		while (!validMove) {
+			try {
+				makeMove();
+				validMove = true;
+			}
+			catch (const invalid_argument& e) {
+				wcout << e.what() << endl;
+			}
+			catch (const logic_error& e) {
+				wcout << L"Logic error: " << e.what() << endl;
+			}
+		}
+		printBoard();
+	}
 }
 
 void Game::makeMove()

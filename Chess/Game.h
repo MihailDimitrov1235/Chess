@@ -27,6 +27,13 @@ private:
 	void handleTimeControl();
 	void printCols(bool reverse);
 
+	void chooseGamemode();
+	void printBoard();
+	bool isGameOver();
+	void makeMove();
+	void setTimeControl(size_t totalTimeInMs, size_t timePerMoveInMs);
+	void loadGame();
+
 	void freePositionsMemory();
 	void free();
 	void copyFrom(const Game& other);
@@ -35,9 +42,5 @@ public:
 	Game(const Game& other);
 	Game& operator=(const Game& other);
 	~Game();
-	void printBoard();
-	bool isGameOver();
-	void makeMove();
-	void setTimeControl(size_t totalTimeInMs, size_t timePerMoveInMs);
-	void loadGame();
+	void startGame();
 };
