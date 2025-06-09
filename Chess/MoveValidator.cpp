@@ -16,8 +16,10 @@ bool MoveValidator::isKingCapturableAt(int row, int col)
 	Piece* king = board[kingRow][kingCol];
 	Piece* captured = board[row][col];
 
-	board[row][col] = king;
-	board[kingRow][kingCol] = new Piece();
+	if (kingRow != row || kingCol != col) {
+		board[row][col] = king;
+		board[kingRow][kingCol] = new Piece();
+	}
 
 	COLORS enemyColor = state.whiteMove ? BLACK : WHITE;
 	bool result = false;
@@ -32,9 +34,11 @@ bool MoveValidator::isKingCapturableAt(int row, int col)
 		}
 	}
 
-	delete board[kingRow][kingCol];
-	board[kingRow][kingCol] = king;
-	board[row][col] = captured;
+	if (kingRow != row || kingCol != col) {
+		delete board[kingRow][kingCol];
+		board[kingRow][kingCol] = king;
+		board[row][col] = captured;
+	}
 
 	return result;
 }
@@ -91,16 +95,19 @@ void MoveValidator::validateKingSafety(int rowFrom, int colFrom, int rowTo, int 
 	Piece* movingPiece = board[rowFrom][colFrom];
 	Piece* capturedPiece = board[rowTo][colTo];
 
+	if (movingPiece->getType() == KING) {
+		if (isKingCapturableAt(rowTo, colTo))
+		{
+			throw invalid_argument("Invalid move. Your king will be in danger.");
+		}
+		return;
+	}
+
 	board[rowTo][colTo] = movingPiece;
 	board[rowFrom][colFrom] = new Piece();
 
 	int kingRow = state.whiteMove ? state.whiteKingRow : state.blackKingRow;
 	int kingCol = state.whiteMove ? state.whiteKingCol : state.blackKingCol;
-
-	if (movingPiece->getType() == KING) {
-		kingRow = rowTo;
-		kingCol = colTo;
-	}
 
 	if (isKingCapturableAt(kingRow, kingCol)) {
 		delete board[rowFrom][colFrom];
@@ -142,7 +149,7 @@ void MoveValidator::validateMove(int rowFrom, int colFrom, int rowTo, int colTo)
 		int rowDiff = rowTo - rowFrom;
 		int colDiff = colTo - colFrom;
 
-		if (abs(colDiff) != 1 || rowDiff != direction) {
+		if (absVal(colDiff) != 1 || rowDiff != direction) {
 			throw invalid_argument("Invalid pawn capture.");
 		}
 	}
