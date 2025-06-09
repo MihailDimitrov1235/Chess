@@ -24,11 +24,8 @@ Piece* Pawn::clone() const {
 
 bool Pawn::canAttack(int fromRow, int fromCol, int toRow, int toCol, Piece* const board[BOARD_SIZE][BOARD_SIZE]) const {
 	int direction = (getColor() == WHITE) ? -1 : 1;
-
-	wcout << fromRow << " " << fromCol << " " << board[toRow][toCol]->getCode() << endl;
 	if (toRow - fromRow == direction && absVal(toCol - fromCol) == 1) {
 		Piece* target = board[toRow][toCol];
-		wcout << (!target->isEmpty() && target->getColor() != getColor() ? "Text" : "tete");
 		return !target->isEmpty() && target->getColor() != getColor();
 	}
 
