@@ -1,17 +1,17 @@
 #pragma once
 
 struct GameState {
-	bool whiteMove;
+	bool whiteMove = true;
 
-	bool whiteCanCastleLong;
-	bool whiteCanCastleShort;
-	bool blackCanCastleLong;
-	bool blackCanCastleShort;
+	bool whiteCanCastleLong = true;
+	bool whiteCanCastleShort = true;
+	bool blackCanCastleLong = true;
+	bool blackCanCastleShort = true;
 
-	int whiteKingRow;
-	int whiteKingCol;
-	int blackKingRow;
-	int blackKingCol;
+	int whiteKingRow = 7;
+	int whiteKingCol = 4;
+	int blackKingRow = 0;
+	int blackKingCol = 4;
 
 	int enPassantSquare[2] = { -1, -1 };
 

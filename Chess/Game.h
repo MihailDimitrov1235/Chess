@@ -20,6 +20,7 @@ private:
 	bool doesPlayerHaveLegalMoves();
 	bool hasPiecesForMate();
 	bool hasThreefoldRepetition();
+	bool hasFiftyMoveRuleHappened();
 	char* encodeBoard();
 	void savePosition();
 	void saveGame();

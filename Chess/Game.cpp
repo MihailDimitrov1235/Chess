@@ -39,7 +39,7 @@ char* Game::encodeBoard()
 	char* result = new char[BOARD_SIZE * BOARD_SIZE + 1];
 	for (size_t row = 0; row < BOARD_SIZE; row++) {
 		for (size_t col = 0; col < BOARD_SIZE; col++) {
-			int index = row * BOARD_SIZE + col;
+			size_t index = row * BOARD_SIZE + col;
 			Piece* piece = board[row][col];
 			char symbol = piece->getType() + 'A';
 			result[index] = piece->getColor() == WHITE ? symbol : toLower(symbol);
@@ -55,7 +55,9 @@ void Game::freePositionsMemory() {
 		delete[] prevPos.positions[i];
 	}
 	delete[] prevPos.positions;
+	prevPos.positions = nullptr;
 	delete[] prevPos.positionsCounter;
+	prevPos.positionsCounter = nullptr;
 	prevPos.positionsSize = 0;
 }
 
@@ -231,7 +233,7 @@ void Game::printCols(bool reverse)
 	wcout << L"  ";
 	for (size_t i = 0; i < BOARD_SIZE; i++)
 	{
-		wchar_t letter = reverse ? L'a' + BOARD_SIZE - i - 1 : L'a' + i;
+		wchar_t letter = (reverse ? L'a' + BOARD_SIZE - i - 1 : L'a' + i);
 		wcout << letter << L" ";
 	}
 	wcout << endl;
@@ -383,6 +385,19 @@ bool Game::hasThreefoldRepetition()
 	return false;
 }
 
+bool Game::hasFiftyMoveRuleHappened()
+{
+	int counter = 0;
+	for (size_t i = 0; i < prevPos.positionsSize; i++)
+	{
+		counter += prevPos.positionsCounter[i];
+		if (counter >= 50) {
+			return true;
+		}
+	}
+	return false;
+}
+
 bool Game::isGameOver() {
 	if (!doesPlayerHaveLegalMoves())
 	{
@@ -408,6 +423,10 @@ bool Game::isGameOver() {
 	if (state.timedGame && (state.whiteTimeInMs <= 0 || state.blackTimeInMs <= 0))
 	{
 		wcout << (state.whiteTimeInMs <= 0 ? L"Black" : L"White") << L" wins due to timeout!";
+		return true;
+	}
+	if (hasFiftyMoveRuleHappened()) {
+		wcout << L"Game ends in a draw due to fifty-move rule.";
 		return true;
 	}
 	return false;
@@ -664,6 +683,10 @@ void Game::makeMove()
 	int rowTo = getRow(moveTo);
 
 	validator.validateMove(rowFrom, colFrom, rowTo, colTo);
+
+	if (!board[rowTo][colTo]->isEmpty() || board[rowFrom][colFrom]->getType() == PAWN) {
+		freePositionsMemory();
+	}
 
 	handleCastlingRelatedMove(rowFrom, colFrom, rowTo, colTo);
 	handleEnPassantRelatedMove(rowFrom, colFrom, rowTo, colTo);
