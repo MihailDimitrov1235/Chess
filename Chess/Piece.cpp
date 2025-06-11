@@ -47,7 +47,7 @@ void Piece::copyFrom(const Piece& other) {
 }
 
 void Piece::free() {
-	for (size_t i = 0; i < movesSize; i++) {
+	for (size_t i = 0; i < movesCapacity; i++) {
 		delete[] moves[i];
 	}
 	delete[] moves;
