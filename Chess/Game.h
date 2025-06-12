@@ -23,10 +23,10 @@ private:
 	void savePosition();
 	void handlePromotion(int row, int col);
 	void handleTimeControl();
-	void printCols(bool reverse);
+	void printCols(bool reverse) const;
 
 	void chooseGamemode();
-	void printBoard();
+	void printBoard() const;
 	bool isGameOver();
 	void makeMove();
 	void setTimeControl(size_t totalTimeInMs, size_t timePerMoveInMs);

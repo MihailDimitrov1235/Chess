@@ -128,7 +128,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Bishop.cpp" />
-    <ClCompile Include="consts.cpp" />
     <ClCompile Include="DataManager.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="King.cpp" />

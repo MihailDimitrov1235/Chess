@@ -7,8 +7,7 @@ using namespace std;
 
 DataManager::DataManager(Piece* (&board)[BOARD_SIZE][BOARD_SIZE], GameState& state, PreviousPositions& prevPos) : board(board), state(state), prevPos(prevPos) {}
 
-void DataManager::saveGame()
-{
+void DataManager::saveGame() const {
 	ofstream outFile(fileName, ios::binary);
 	if (!outFile) {
 		throw runtime_error("Could not open save file.");

@@ -4,7 +4,7 @@
 class Piece
 {
 private:
-	const wchar_t* code;
+	wchar_t code;
 	size_t movesSize;
 	size_t movesCapacity;
 	COLORS color;
@@ -28,7 +28,7 @@ public:
 
 	COLORS getColor() const;
 	PIECES getType() const;
-	const wchar_t* getCode() const;
+	wchar_t getCode() const;
 	bool getSliding() const;
 	int** getMoves() const;
 	size_t getMovesSize() const;
@@ -38,8 +38,6 @@ public:
 
 	bool isEmpty() const;
 
-	virtual bool canAttack(int fromRow, int fromCol, int toRow, int toCol, Piece* const board[BOARD_SIZE][BOARD_SIZE]) const;
-	virtual void validateMove(int fromRow, int fromCol, int toRow, int toCol,
-		Piece* const board[BOARD_SIZE][BOARD_SIZE]) const;
-
+	virtual bool canAttack(int fromRow, int fromCol, int toRow, int toCol, const Piece* const board[BOARD_SIZE][BOARD_SIZE]) const;
+	virtual void validateMove(int fromRow, int fromCol, int toRow, int toCol, const Piece* const board[BOARD_SIZE][BOARD_SIZE]) const;
 };

@@ -20,7 +20,7 @@ Piece* Rook::clone() const {
 	return new Rook(*this);
 }
 
-bool Rook::canAttack(int fromRow, int fromCol, int toRow, int toCol, Piece* const board[BOARD_SIZE][BOARD_SIZE]) const {
+bool Rook::canAttack(int fromRow, int fromCol, int toRow, int toCol, const Piece* const board[BOARD_SIZE][BOARD_SIZE]) const {
 	if (fromRow != toRow && fromCol != toCol) {
 		return false;
 	}
@@ -37,7 +37,7 @@ bool Rook::canAttack(int fromRow, int fromCol, int toRow, int toCol, Piece* cons
 	return true;
 }
 
-void Rook::validateMove(int fromRow, int fromCol, int toRow, int toCol, Piece* const board[BOARD_SIZE][BOARD_SIZE]) const {
+void Rook::validateMove(int fromRow, int fromCol, int toRow, int toCol, const Piece* const board[BOARD_SIZE][BOARD_SIZE]) const {
 	if (!canAttack(fromRow, fromCol, toRow, toCol, board)) {
 		throw invalid_argument("Invalid Rook move.");
 	}

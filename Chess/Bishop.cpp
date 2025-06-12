@@ -22,7 +22,7 @@ Piece* Bishop::clone() const {
 	return new Bishop(*this);
 }
 
-bool Bishop::canAttack(int fromRow, int fromCol, int toRow, int toCol, Piece* const board[BOARD_SIZE][BOARD_SIZE]) const {
+bool Bishop::canAttack(int fromRow, int fromCol, int toRow, int toCol, const Piece* const board[BOARD_SIZE][BOARD_SIZE]) const {
 	if (absVal(toRow - fromRow) != absVal(toCol - fromCol)) {
 		return false;
 	}
@@ -37,7 +37,7 @@ bool Bishop::canAttack(int fromRow, int fromCol, int toRow, int toCol, Piece* co
 	return true;
 }
 
-void Bishop::validateMove(int fromRow, int fromCol, int toRow, int toCol, Piece* const board[BOARD_SIZE][BOARD_SIZE]) const {
+void Bishop::validateMove(int fromRow, int fromCol, int toRow, int toCol, const Piece* const board[BOARD_SIZE][BOARD_SIZE]) const {
 	if (!canAttack(fromRow, fromCol, toRow, toCol, board)) {
 		throw invalid_argument("Invalid Bishop move.");
 	}

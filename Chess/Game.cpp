@@ -27,8 +27,7 @@ void Game::setupBackRank(COLORS color, int row) {
 	board[row][7] = new Rook(color);
 }
 
-void Game::setupPawns(COLORS color, int row)
-{
+void Game::setupPawns(COLORS color, int row) {
 	for (size_t col = 0; col < BOARD_SIZE; col++) {
 		board[row][col] = new Pawn(color);
 	}
@@ -87,7 +86,7 @@ void Game::copyFrom(const Game& other) {
 		prevPos.positions = new char* [prevPos.positionsSize];
 		prevPos.positionsCounter = new int[prevPos.positionsSize];
 
-		for (int i = 0; i < prevPos.positionsSize; ++i) {
+		for (int i = 0; i < prevPos.positionsSize; i++) {
 			prevPos.positions[i] = new char[BOARD_SIZE * BOARD_SIZE + 1];
 			strcpy_s(prevPos.positions[i], BOARD_SIZE * BOARD_SIZE + 1, other.prevPos.positions[i]);
 			prevPos.positionsCounter[i] = other.prevPos.positionsCounter[i];
@@ -101,8 +100,7 @@ void Game::copyFrom(const Game& other) {
 	state.paused = true;
 }
 
-void Game::savePosition()
-{
+void Game::savePosition() {
 	char* newPosition = encodeBoard(board);
 	for (size_t i = 0; i < prevPos.positionsSize; i++)
 	{
@@ -149,10 +147,8 @@ Game::Game(const Game& other) : validator(board, state), dataManager(board, stat
 	copyFrom(other);
 }
 
-Game& Game::operator=(const Game& other)
-{
-	if (this != &other)
-	{
+Game& Game::operator=(const Game& other) {
+	if (this != &other) {
 		free();
 		copyFrom(other);
 	}
@@ -198,19 +194,16 @@ void Game::chooseGamemode() {
 	}
 }
 
-void Game::printCols(bool reverse)
-{
+void Game::printCols(bool reverse) const {
 	wcout << L"  ";
-	for (size_t i = 0; i < BOARD_SIZE; i++)
-	{
+	for (size_t i = 0; i < BOARD_SIZE; i++) {
 		wchar_t letter = (reverse ? L'a' + BOARD_SIZE - i - 1 : L'a' + i);
 		wcout << letter << L" ";
 	}
 	wcout << endl;
 }
 
-void Game::printBoard()
-{
+void Game::printBoard() const {
 	wcout << L"\033[2J\033[H"; // clear console and start top left
 
 	bool reverse = !state.whiteMove;
@@ -276,8 +269,7 @@ bool Game::doesPieceHaveLegalMoves(int row, int col) {
 	return false;
 }
 
-bool Game::doesPlayerHaveLegalMoves()
-{
+bool Game::doesPlayerHaveLegalMoves() {
 	COLORS color = state.whiteMove ? WHITE : BLACK;
 	for (int row = 0; row < BOARD_SIZE; row++)
 	{
@@ -344,10 +336,10 @@ void Game::handleCastlingRelatedMove(int rowFrom, int colFrom, int rowTo, int co
 			state.whiteKingCol = colTo;
 
 			if (rowFrom == 7 && colFrom == 4 && rowTo == 7 && colTo == 6) {
-				swap(board[7][5], board[7][7]);
+				pSwap(board[7][5], board[7][7]);
 			}
 			if (rowFrom == 7 && colFrom == 4 && rowTo == 7 && colTo == 2) {
-				swap(board[7][3], board[7][0]);
+				pSwap(board[7][3], board[7][0]);
 			}
 		}
 		else {
@@ -358,10 +350,10 @@ void Game::handleCastlingRelatedMove(int rowFrom, int colFrom, int rowTo, int co
 			state.blackKingCol = colTo;
 
 			if (rowFrom == 0 && colFrom == 4 && rowTo == 0 && colTo == 6) {
-				swap(board[0][5], board[0][7]);
+				pSwap(board[0][5], board[0][7]);
 			}
 			if (rowFrom == 0 && colFrom == 4 && rowTo == 0 && colTo == 2) {
-				swap(board[0][3], board[0][0]);
+				pSwap(board[0][3], board[0][0]);
 			}
 		}
 	}
@@ -405,8 +397,7 @@ void Game::handleEnPassantRelatedMove(int rowFrom, int colFrom, int rowTo, int c
 	}
 }
 
-void Game::handlePromotion(int row, int col)
-{
+void Game::handlePromotion(int row, int col) {
 	int promotionRow = state.whiteMove ? 0 : 7;
 	COLORS color = state.whiteMove ? WHITE : BLACK;
 	if (board[row][col]->getType() == PAWN && promotionRow == row)
@@ -436,8 +427,7 @@ void Game::handlePromotion(int row, int col)
 	}
 }
 
-void Game::handleTimeControl()
-{
+void Game::handleTimeControl() {
 	if (!state.timedGame) {
 		return;
 	}
@@ -492,8 +482,7 @@ void Game::startGame() {
 	}
 }
 
-void Game::makeMove()
-{
+void Game::makeMove() {
 	const int BUFFER_SIZE = 128;
 	char moveFrom[BUFFER_SIZE];
 	char moveTo[BUFFER_SIZE];
@@ -535,8 +524,7 @@ void Game::makeMove()
 	savePosition();
 }
 
-void Game::setTimeControl(size_t totalTimeInMs, size_t timePerMoveInMs)
-{
+void Game::setTimeControl(size_t totalTimeInMs, size_t timePerMoveInMs) {
 	state.timedGame = true;
 	state.whiteTimeInMs = totalTimeInMs;
 	state.blackTimeInMs = totalTimeInMs;

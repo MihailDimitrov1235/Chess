@@ -17,8 +17,7 @@
 using namespace std;
 
 char toLower(char ch) {
-	if (ch >= 'A' && ch <= 'Z')
-	{
+	if (ch >= 'A' && ch <= 'Z') {
 		return ch - 'A' + 'a';
 	}
 	return ch;
@@ -29,51 +28,42 @@ void setColor(int textColor, int bgColor) {
 	SetConsoleTextAttribute(hConsole, textColor + (bgColor << 4));
 }
 
-int getCol(const char* location)
-{
+int getCol(const char* location) {
 	return toLower(location[0]) - 'a';
 }
 
-int getRow(const char* location)
-{
+int getRow(const char* location) {
 	return BOARD_SIZE - (location[1] - '0');
 }
 
-void validateLocation(const char* location)
-{
-	if (strlen(location) != 2)
-	{
+void validateLocation(const char* location) {
+	if (strlen(location) != 2) {
 		throw invalid_argument("Invalid location. Use two characters like 'e2'.");
 	}
 	char colChar = toLower(location[0]);
 	int column = getCol(location);
-	if (column < 0 || column >= BOARD_SIZE)
-	{
+	if (column < 0 || column >= BOARD_SIZE) {
 		throw invalid_argument("Invalid column. Must be a-h.");
 	}
 	int row = getRow(location);
-	if (row < 0 || row >= BOARD_SIZE)
-	{
+	if (row < 0 || row >= BOARD_SIZE) {
 		throw invalid_argument("Invalid row. Must be 1-8.");
 	}
 }
 
 int absVal(int number) {
-	if (number < 0)
-	{
+	if (number < 0) {
 		return -number;
 	}
 	return number;
 }
 
-bool compareStrs(const char* str1, const char* str2, bool caseSensitive)
-{
+bool compareStrs(const char* str1, const char* str2, bool caseSensitive) {
 	if (str1 == nullptr || str2 == nullptr) {
 		return false;
 	}
 	while (*str1 && *str2) {
-		if (caseSensitive && *str1 != *str2)
-		{
+		if (caseSensitive && *str1 != *str2) {
 			return false;
 		}
 		if (!caseSensitive && toLower(*str1) != toLower(*str2)) {
@@ -86,28 +76,24 @@ bool compareStrs(const char* str1, const char* str2, bool caseSensitive)
 	return *str1 == *str2;
 }
 
-void fixCin()
-{
+void fixCin() {
 	cin.clear();
 	cin.sync();
 	cin.ignore();
 }
 
-size_t getCurrentTimeInMs()
-{
+size_t getCurrentTimeInMs() {
 	size_t time = GetTickCount64(); // windows
 	//size_t time = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch()).count(); // cross-platform
 	return time;
 }
 
-void selectOption(int& option, int from, int to)
-{
+void selectOption(int& option, int from, int to) {
 	bool optionSelected = false;
 	while (!optionSelected) {
 		try {
 			cin >> option;
-			if (option < from || option > to)
-			{
+			if (option < from || option > to) {
 				ostringstream message;
 				message << "Select number between " << from << " and " << to << ":";
 				throw invalid_argument(message.str());
@@ -135,8 +121,7 @@ Piece* createPiece(COLORS color, PIECES type) {
 	}
 }
 
-bool hasPiecesForMate(Piece* board[BOARD_SIZE][BOARD_SIZE])
-{
+bool hasPiecesForMate(Piece* board[BOARD_SIZE][BOARD_SIZE]) {
 	int blackMinorPieces = 0;
 	COLORS blackBishopSquareColor = NONE;
 	int whiteMinorPieces = 0;
@@ -163,12 +148,10 @@ bool hasPiecesForMate(Piece* board[BOARD_SIZE][BOARD_SIZE])
 				}
 			}
 			else {
-				if (type == KNIGHT || (type == BISHOP && squareColor != blackBishopSquareColor))
-				{
+				if (type == KNIGHT || (type == BISHOP && squareColor != blackBishopSquareColor)) {
 					blackMinorPieces++;
 				}
-				if (type == BISHOP)
-				{
+				if (type == BISHOP) {
 					blackBishopSquareColor = squareColor;
 				}
 			}
@@ -182,10 +165,8 @@ bool hasPiecesForMate(Piece* board[BOARD_SIZE][BOARD_SIZE])
 	return false;
 }
 
-bool hasThreefoldRepetition(PreviousPositions prevPos)
-{
-	for (size_t i = 0; i < prevPos.positionsSize; i++)
-	{
+bool hasThreefoldRepetition(const PreviousPositions& prevPos) {
+	for (size_t i = 0; i < prevPos.positionsSize; i++) {
 		if (prevPos.positionsCounter[i] >= 3) {
 			return true;
 		}
@@ -193,11 +174,9 @@ bool hasThreefoldRepetition(PreviousPositions prevPos)
 	return false;
 }
 
-bool hasFiftyMoveRuleHappened(PreviousPositions prevPos)
-{
+bool hasFiftyMoveRuleHappened(const PreviousPositions& prevPos) {
 	int counter = 0;
-	for (size_t i = 0; i < prevPos.positionsSize; i++)
-	{
+	for (size_t i = 0; i < prevPos.positionsSize; i++) {
 		counter += prevPos.positionsCounter[i];
 		if (counter >= 50) {
 			return true;
@@ -206,8 +185,7 @@ bool hasFiftyMoveRuleHappened(PreviousPositions prevPos)
 	return false;
 }
 
-char* encodeBoard(Piece* board[BOARD_SIZE][BOARD_SIZE])
-{
+char* encodeBoard(Piece* board[BOARD_SIZE][BOARD_SIZE]) {
 	char* result = new char[BOARD_SIZE * BOARD_SIZE + 1];
 	for (size_t row = 0; row < BOARD_SIZE; row++) {
 		for (size_t col = 0; col < BOARD_SIZE; col++) {
@@ -219,4 +197,10 @@ char* encodeBoard(Piece* board[BOARD_SIZE][BOARD_SIZE])
 	}
 	result[BOARD_SIZE * BOARD_SIZE] = '\0';
 	return result;
+}
+
+void pSwap(Piece*& p1, Piece*& p2) {
+	Piece* temp = p1;
+	p1 = p2;
+	p2 = temp;
 }
