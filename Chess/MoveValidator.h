@@ -1,6 +1,5 @@
 #pragma once
 #include "GameState.h"
-#include "consts.h"
 #include "Piece.h"
 
 class MoveValidator {

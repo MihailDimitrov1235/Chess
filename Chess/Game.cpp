@@ -1,18 +1,10 @@
 #include <iostream>
-#include <fstream>
-#include <windows.h>
-#include <io.h>
-#include <fcntl.h>
 #include "Game.h"
-#include "consts.h"
 #include "utils.h"
-#include "Rook.h"
 #include "King.h"
 #include "Queen.h"
-#include "Bishop.h"
 #include "Knight.h"
 #include "Pawn.h"
-
 
 using namespace std;
 
@@ -198,13 +190,13 @@ void Game::printCols(bool reverse) const {
 	wcout << L"  ";
 	for (size_t i = 0; i < BOARD_SIZE; i++) {
 		wchar_t letter = (reverse ? L'a' + BOARD_SIZE - i - 1 : L'a' + i);
-		wcout << letter << L" ";
+		wcout << letter << L' ';
 	}
 	wcout << endl;
 }
 
 void Game::printBoard() const {
-	wcout << L"\033[2J\033[H"; // clear console and start top left
+	wcout << CLEAR_SCREEN << CLEAR_SCROLLBACK << MOVE_CURSOR;
 
 	bool reverse = !state.whiteMove;
 	printCols(reverse);
@@ -212,7 +204,7 @@ void Game::printBoard() const {
 	int pieceColor = BLACK_COLOR;
 	for (size_t i = 0; i < BOARD_SIZE; i++)
 	{
-		wcout << (reverse ? i + 1 : BOARD_SIZE - i) << L" ";
+		wcout << (reverse ? i + 1 : BOARD_SIZE - i) << L' ';
 		for (size_t j = 0; j < BOARD_SIZE; j++) {
 			bool isWhiteSquare = (i + j) % 2 == 0;
 			int bgColor = isWhiteSquare ? LIGHT_GRAY_COLOR : DARK_GRAY_COLOR;
@@ -222,16 +214,16 @@ void Game::printBoard() const {
 			Piece* piece = reverse ? board[BOARD_SIZE - i - 1][BOARD_SIZE - j - 1] : board[i][j];
 			wcout << piece->getCode();
 
-			if (j != BOARD_SIZE - 1 || piece->getType() == EMPTY_SQUARE)
-			{
-				wcout << L" ";
+			if (j != BOARD_SIZE - 1 || piece->getType() == EMPTY_SQUARE) {
+				wcout << L' ';
 			}
 		}
 		setColor(WHITE_COLOR, BLACK_COLOR);
 		if (board[i][BOARD_SIZE - 1]->getType() != EMPTY_SQUARE) {
-			wcout << L" ";
+			wcout << L' ';
 		}
-		wcout << L" " << (reverse ? i + 1 : BOARD_SIZE - i) << endl;
+		size_t row = reverse ? i + 1 : BOARD_SIZE - i;
+		wcout << L' ' << row << endl;
 	}
 
 	printCols(reverse);

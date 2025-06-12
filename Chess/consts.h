@@ -2,7 +2,25 @@
 const int BOARD_SIZE = 8;
 const int COORDINATES = 2;
 
-const char const fileName[] = "game_save.bin";
+const char fileName[] = "game_save.bin";
+
+const wchar_t CLEAR_SCREEN[] = {
+		0x1B, // ESC
+		L'[', L'2', L'J',
+		0x00  // null terminator
+};
+
+const wchar_t CLEAR_SCROLLBACK[] = {
+		0x1B, // ESC
+		L'[', L'3', L'J',
+		0x00  // null terminator
+};
+
+const wchar_t MOVE_CURSOR[] = {
+	0x1B, // ESC
+	L'[', L'H',
+	0x00  // null terminator
+};
 
 const wchar_t WHITE_PIECES[] = {
 	0x2654, // KING

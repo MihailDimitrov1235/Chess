@@ -1,6 +1,5 @@
 #pragma once
 #include "Piece.h"
-#include "consts.h"
 
 struct PreviousPositions {
 	int positionsSize = 0;
