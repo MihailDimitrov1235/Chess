@@ -3,6 +3,7 @@
 #include "GameState.h"
 #include "PreviousPositions.h"
 #include "MoveValidator.h"
+#include "DataManager.h"
 
 class Game {
 private:
@@ -10,6 +11,7 @@ private:
 	GameState state;
 	PreviousPositions prevPos;
 	MoveValidator validator;
+	DataManager dataManager;
 	size_t lastMoveTimestamp;
 
 	void setupPawns(COLORS color, int row);
@@ -18,12 +20,7 @@ private:
 	void handleEnPassantRelatedMove(int rowFrom, int colFrom, int rowTo, int colTo);
 	bool doesPieceHaveLegalMoves(int row, int col);
 	bool doesPlayerHaveLegalMoves();
-	bool hasPiecesForMate();
-	bool hasThreefoldRepetition();
-	bool hasFiftyMoveRuleHappened();
-	char* encodeBoard();
 	void savePosition();
-	void saveGame();
 	void handlePromotion(int row, int col);
 	void handleTimeControl();
 	void printCols(bool reverse);
@@ -33,7 +30,6 @@ private:
 	bool isGameOver();
 	void makeMove();
 	void setTimeControl(size_t totalTimeInMs, size_t timePerMoveInMs);
-	void loadGame();
 
 	void freePositionsMemory();
 	void free();

@@ -1,7 +1,7 @@
 #include <iostream>
 #include <sstream>
 #include <windows.h>
-#include <chrono>
+//#include <chrono>
 #include "King.h"
 #include "Queen.h"
 #include "Bishop.h"
@@ -9,10 +9,10 @@
 #include "Knight.h"
 #include "Rook.h"
 
-
 #include "utils.h"
 #include "consts.h"
 #include "Piece.h"
+#include "PreviousPositions.h"
 
 using namespace std;
 
@@ -56,11 +56,6 @@ void validateLocation(const char* location)
 	{
 		throw invalid_argument("Invalid row. Must be 1-8.");
 	}
-}
-
-void movePiece(Piece& p1, Piece& p2) {
-	p2 = p1;
-	p1 = Piece();
 }
 
 int absVal(int number) {
@@ -126,14 +121,6 @@ void selectOption(int& option, int from, int to)
 	}
 }
 
-void swap(Piece*& p1, Piece*& p2) {
-	Piece* temp = p1->clone();
-	delete p1;
-	p1 = p2->clone();
-	delete p2;
-	p2 = temp;
-}
-
 Piece* createPiece(COLORS color, PIECES type) {
 	switch (type) {
 	case KING:   return new King(color);
@@ -146,4 +133,90 @@ Piece* createPiece(COLORS color, PIECES type) {
 	default:
 		throw invalid_argument("Unknown piece type in save file.");
 	}
+}
+
+bool hasPiecesForMate(Piece* board[BOARD_SIZE][BOARD_SIZE])
+{
+	int blackMinorPieces = 0;
+	COLORS blackBishopSquareColor = NONE;
+	int whiteMinorPieces = 0;
+	COLORS whiteBishopSquareColor = NONE;
+	for (int row = 0; row < BOARD_SIZE; row++) {
+		for (int col = 0; col < BOARD_SIZE; col++) {
+			Piece* piece = board[row][col];
+			if (piece->isEmpty() || piece->getType() == KING) {
+				continue;
+			}
+			PIECES type = piece->getType();
+			if (type == PAWN || type == ROOK || type == QUEEN) {
+				return true;
+			}
+			COLORS squareColor = (row + col) % 2 == 0 ? WHITE : BLACK;
+			if (piece->getColor() == WHITE) {
+				if (type == KNIGHT || (type == BISHOP && squareColor != whiteBishopSquareColor))
+				{
+					whiteMinorPieces++;
+				}
+				if (type == BISHOP)
+				{
+					whiteBishopSquareColor = squareColor;
+				}
+			}
+			else {
+				if (type == KNIGHT || (type == BISHOP && squareColor != blackBishopSquareColor))
+				{
+					blackMinorPieces++;
+				}
+				if (type == BISHOP)
+				{
+					blackBishopSquareColor = squareColor;
+				}
+			}
+
+		}
+	}
+	if (whiteMinorPieces >= 2 || blackMinorPieces >= 2)
+	{
+		return true;
+	}
+	return false;
+}
+
+bool hasThreefoldRepetition(PreviousPositions prevPos)
+{
+	for (size_t i = 0; i < prevPos.positionsSize; i++)
+	{
+		if (prevPos.positionsCounter[i] >= 3) {
+			return true;
+		}
+	}
+	return false;
+}
+
+bool hasFiftyMoveRuleHappened(PreviousPositions prevPos)
+{
+	int counter = 0;
+	for (size_t i = 0; i < prevPos.positionsSize; i++)
+	{
+		counter += prevPos.positionsCounter[i];
+		if (counter >= 50) {
+			return true;
+		}
+	}
+	return false;
+}
+
+char* encodeBoard(Piece* board[BOARD_SIZE][BOARD_SIZE])
+{
+	char* result = new char[BOARD_SIZE * BOARD_SIZE + 1];
+	for (size_t row = 0; row < BOARD_SIZE; row++) {
+		for (size_t col = 0; col < BOARD_SIZE; col++) {
+			size_t index = row * BOARD_SIZE + col;
+			Piece* piece = board[row][col];
+			char symbol = piece->getType() + 'A';
+			result[index] = piece->getColor() == WHITE ? symbol : toLower(symbol);
+		}
+	}
+	result[BOARD_SIZE * BOARD_SIZE] = '\0';
+	return result;
 }

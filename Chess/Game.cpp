@@ -34,21 +34,6 @@ void Game::setupPawns(COLORS color, int row)
 	}
 }
 
-char* Game::encodeBoard()
-{
-	char* result = new char[BOARD_SIZE * BOARD_SIZE + 1];
-	for (size_t row = 0; row < BOARD_SIZE; row++) {
-		for (size_t col = 0; col < BOARD_SIZE; col++) {
-			size_t index = row * BOARD_SIZE + col;
-			Piece* piece = board[row][col];
-			char symbol = piece->getType() + 'A';
-			result[index] = piece->getColor() == WHITE ? symbol : toLower(symbol);
-		}
-	}
-	result[BOARD_SIZE * BOARD_SIZE] = '\0';
-	return result;
-}
-
 void Game::freePositionsMemory() {
 	for (size_t i = 0; i < prevPos.positionsSize; i++)
 	{
@@ -118,7 +103,7 @@ void Game::copyFrom(const Game& other) {
 
 void Game::savePosition()
 {
-	char* newPosition = encodeBoard();
+	char* newPosition = encodeBoard(board);
 	for (size_t i = 0; i < prevPos.positionsSize; i++)
 	{
 		if (compareStrs(prevPos.positions[i], newPosition)) {
@@ -144,20 +129,7 @@ void Game::savePosition()
 	prevPos.positionsSize = newSize;
 }
 
-Game::Game() : validator(board, state) {
-	state.whiteMove = true;
-
-	state.whiteCanCastleLong = true;
-	state.whiteCanCastleShort = true;
-	state.blackCanCastleLong = true;
-	state.blackCanCastleShort = true;
-
-	state.whiteKingRow = 7;
-	state.whiteKingCol = 4;
-	state.blackKingRow = 0;
-	state.blackKingCol = 4;
-
-	state.timedGame = false;
+Game::Game() : validator(board, state), dataManager(board, state, prevPos) {
 
 	for (int row = 2; row < BOARD_SIZE - 2; row++) {
 		for (int col = 0; col < BOARD_SIZE; col++) {
@@ -171,11 +143,9 @@ Game::Game() : validator(board, state) {
 	setupBackRank(WHITE, BOARD_SIZE - 1);
 
 	savePosition();
-
-	state.paused = true;
 }
 
-Game::Game(const Game& other) : validator(board, state) {
+Game::Game(const Game& other) : validator(board, state), dataManager(board, state, prevPos) {
 	copyFrom(other);
 }
 
@@ -219,7 +189,7 @@ void Game::chooseGamemode() {
 	}
 	else {
 		try {
-			loadGame();
+			dataManager.loadGame();
 		}
 		catch (const exception& e) {
 			wcout << e.what() << endl;
@@ -327,77 +297,6 @@ bool Game::doesPlayerHaveLegalMoves()
 	return false;
 }
 
-bool Game::hasPiecesForMate()
-{
-	int blackMinorPieces = 0;
-	COLORS blackBishopSquareColor = NONE;
-	int whiteMinorPieces = 0;
-	COLORS whiteBishopSquareColor = NONE;
-	for (int row = 0; row < BOARD_SIZE; row++) {
-		for (int col = 0; col < BOARD_SIZE; col++) {
-			Piece* piece = board[row][col];
-			if (piece->isEmpty() || piece->getType() == KING) {
-				continue;
-			}
-			PIECES type = piece->getType();
-			if (type == PAWN || type == ROOK || type == QUEEN) {
-				return true;
-			}
-			COLORS squareColor = (row + col) % 2 == 0 ? WHITE : BLACK;
-			if (piece->getColor() == WHITE) {
-				if (type == KNIGHT || (type == BISHOP && squareColor != whiteBishopSquareColor))
-				{
-					whiteMinorPieces++;
-				}
-				if (type == BISHOP)
-				{
-					whiteBishopSquareColor = squareColor;
-				}
-			}
-			else {
-				if (type == KNIGHT || (type == BISHOP && squareColor != blackBishopSquareColor))
-				{
-					blackMinorPieces++;
-				}
-				if (type == BISHOP)
-				{
-					blackBishopSquareColor = squareColor;
-				}
-			}
-
-		}
-	}
-	if (whiteMinorPieces >= 2 || blackMinorPieces >= 2)
-	{
-		return true;
-	}
-	return false;
-}
-
-bool Game::hasThreefoldRepetition()
-{
-	for (size_t i = 0; i < prevPos.positionsSize; i++)
-	{
-		if (prevPos.positionsCounter[i] >= 3) {
-			return true;
-		}
-	}
-	return false;
-}
-
-bool Game::hasFiftyMoveRuleHappened()
-{
-	int counter = 0;
-	for (size_t i = 0; i < prevPos.positionsSize; i++)
-	{
-		counter += prevPos.positionsCounter[i];
-		if (counter >= 50) {
-			return true;
-		}
-	}
-	return false;
-}
-
 bool Game::isGameOver() {
 	if (!doesPlayerHaveLegalMoves())
 	{
@@ -411,11 +310,11 @@ bool Game::isGameOver() {
 		}
 		return true;
 	}
-	if (!hasPiecesForMate()) {
+	if (!hasPiecesForMate(board)) {
 		wcout << L"Game ends in a draw because of lack of pieces for checkmate.";
 		return true;
 	}
-	if (hasThreefoldRepetition())
+	if (hasThreefoldRepetition(prevPos))
 	{
 		wcout << L"Game ends in a draw due to threefold repetition.";
 		return true;
@@ -425,7 +324,7 @@ bool Game::isGameOver() {
 		wcout << (state.whiteTimeInMs <= 0 ? L"Black" : L"White") << L" wins due to timeout!";
 		return true;
 	}
-	if (hasFiftyMoveRuleHappened()) {
+	if (hasFiftyMoveRuleHappened(prevPos)) {
 		wcout << L"Game ends in a draw due to fifty-move rule.";
 		return true;
 	}
@@ -572,69 +471,6 @@ void Game::handleTimeControl()
 	lastMoveTimestamp = currentTime;
 }
 
-void Game::saveGame()
-{
-	ofstream outFile(fileName, ios::binary);
-	if (!outFile) {
-		throw runtime_error("Could not open save file.");
-	}
-	outFile.write(reinterpret_cast<const char*>(&state), sizeof(GameState));
-
-	for (size_t i = 0; i < BOARD_SIZE; i++)
-	{
-		for (size_t j = 0; j < BOARD_SIZE; j++)
-		{
-			Piece* piece = board[i][j];
-			PIECES type = piece->getType();
-			COLORS color = piece->getColor();
-			outFile.write(reinterpret_cast<const char*>(&type), sizeof(int));
-			outFile.write(reinterpret_cast<const char*>(&color), sizeof(int));
-
-		}
-	}
-
-	outFile.write(reinterpret_cast<const char*>(&prevPos.positionsSize), sizeof(int));
-	for (int i = 0; i < prevPos.positionsSize; i++) {
-		outFile.write(prevPos.positions[i], BOARD_SIZE * BOARD_SIZE);
-		outFile.write(reinterpret_cast<const char*>(&prevPos.positionsCounter[i]), sizeof(int));
-	}
-	outFile.close();
-}
-
-void Game::loadGame()
-{
-	ifstream inFile(fileName, ios::binary);
-	if (!inFile) {
-		throw runtime_error("Could not open save file.");
-	}
-	inFile.read(reinterpret_cast<char*>(&state), sizeof(GameState));
-
-	for (size_t i = 0; i < BOARD_SIZE; i++)
-	{
-		for (size_t j = 0; j < BOARD_SIZE; j++)
-		{
-			PIECES type;
-			COLORS color;
-			inFile.read(reinterpret_cast<char*>(&type), sizeof(int));
-			inFile.read(reinterpret_cast<char*>(&color), sizeof(int));
-			delete board[i][j];
-			board[i][j] = createPiece(color, type);
-		}
-	}
-
-	inFile.read(reinterpret_cast<char*>(&prevPos.positionsSize), sizeof(int));
-	prevPos.positions = new char* [prevPos.positionsSize];
-	prevPos.positionsCounter = new int[prevPos.positionsSize];
-	for (int i = 0; i < prevPos.positionsSize; i++) {
-		prevPos.positions[i] = new char[BOARD_SIZE * BOARD_SIZE + 1];
-		inFile.read(prevPos.positions[i], BOARD_SIZE * BOARD_SIZE);
-		prevPos.positions[i][BOARD_SIZE * BOARD_SIZE] = '\0';
-		inFile.read(reinterpret_cast<char*>(&prevPos.positionsCounter[i]), sizeof(int));
-	}
-	state.paused = true;
-	inFile.close();
-}
-
 void Game::startGame() {
 	chooseGamemode();
 	printBoard();
@@ -664,7 +500,7 @@ void Game::makeMove()
 	cin >> moveFrom;
 	while (compareStrs(moveFrom, "save", false))
 	{
-		saveGame();
+		dataManager.saveGame();
 		wcout << L"Game saved\n";
 		cin >> moveFrom;
 	}

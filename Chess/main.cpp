@@ -4,10 +4,7 @@
 #include <fcntl.h>
 //#include <cstdlib>
 //#include <crtdbg.h>
-
-#include "consts.h"
 #include "Game.h"
-#include "utils.h"
 
 using namespace std;
 
