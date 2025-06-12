@@ -121,7 +121,7 @@ Piece* createPiece(COLORS color, PIECES type) {
 	}
 }
 
-bool hasPiecesForMate(Piece* board[BOARD_SIZE][BOARD_SIZE]) {
+bool hasPiecesForMate(Piece* const board[BOARD_SIZE][BOARD_SIZE]) {
 	int blackMinorPieces = 0;
 	COLORS blackBishopSquareColor = NONE;
 	int whiteMinorPieces = 0;

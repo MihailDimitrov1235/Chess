@@ -23,13 +23,13 @@ Piece* King::clone() const {
 	return new King(*this);
 }
 
-bool King::canAttack(int fromRow, int fromCol, int toRow, int toCol, const Piece* const board[BOARD_SIZE][BOARD_SIZE]) const {
+bool King::canAttack(int fromRow, int fromCol, int toRow, int toCol, Piece* const board[BOARD_SIZE][BOARD_SIZE]) const {
 	int rowDiff = absVal(fromRow - toRow);
 	int colDiff = absVal(fromCol - toCol);
 	return (rowDiff <= 1 && colDiff <= 1 && (rowDiff + colDiff != 0));
 }
 
-void King::validateMove(int fromRow, int fromCol, int toRow, int toCol, const Piece* const board[BOARD_SIZE][BOARD_SIZE]) const {
+void King::validateMove(int fromRow, int fromCol, int toRow, int toCol, Piece* const board[BOARD_SIZE][BOARD_SIZE]) const {
 	if (!canAttack(fromRow, fromCol, toRow, toCol, board)) {
 		throw invalid_argument("Invalid King move.");
 	}

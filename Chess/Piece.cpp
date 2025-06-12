@@ -144,10 +144,10 @@ bool Piece::isEmpty() const {
 	return color == NONE || type == EMPTY_SQUARE || movesSize == 0;
 }
 
-bool Piece::canAttack(int fromRow, int fromCol, int toRow, int toCol, const Piece* const board[BOARD_SIZE][BOARD_SIZE]) const {
+bool Piece::canAttack(int fromRow, int fromCol, int toRow, int toCol, Piece* const board[BOARD_SIZE][BOARD_SIZE]) const {
 	return false;
 }
 
-void Piece::validateMove(int fromRow, int fromCol, int toRow, int toCol, const Piece* const board[BOARD_SIZE][BOARD_SIZE]) const {
+void Piece::validateMove(int fromRow, int fromCol, int toRow, int toCol, Piece* const board[BOARD_SIZE][BOARD_SIZE]) const {
 	throw invalid_argument("Square is empty.");
 }

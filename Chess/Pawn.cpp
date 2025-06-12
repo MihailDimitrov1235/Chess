@@ -22,7 +22,7 @@ Piece* Pawn::clone() const {
 	return new Pawn(*this);
 }
 
-bool Pawn::canAttack(int fromRow, int fromCol, int toRow, int toCol, const Piece* const board[BOARD_SIZE][BOARD_SIZE]) const {
+bool Pawn::canAttack(int fromRow, int fromCol, int toRow, int toCol, Piece* const board[BOARD_SIZE][BOARD_SIZE]) const {
 	int direction = (getColor() == WHITE) ? -1 : 1;
 	if (toRow - fromRow == direction && absVal(toCol - fromCol) == 1) {
 		const Piece* target = board[toRow][toCol];
@@ -32,7 +32,7 @@ bool Pawn::canAttack(int fromRow, int fromCol, int toRow, int toCol, const Piece
 	return false;
 }
 
-void Pawn::validateMove(int fromRow, int fromCol, int toRow, int toCol, const Piece* const board[BOARD_SIZE][BOARD_SIZE]) const {
+void Pawn::validateMove(int fromRow, int fromCol, int toRow, int toCol, Piece* const board[BOARD_SIZE][BOARD_SIZE]) const {
 	COLORS enemyColor = getColor() == WHITE ? BLACK : WHITE;
 	int direction = (getColor() == WHITE) ? -1 : 1;
 	int startRow = (getColor() == WHITE) ? 6 : 1;
