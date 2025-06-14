@@ -233,7 +233,6 @@ void Game::printBoard() const {
 		size_t timeLeft = state.whiteMove ? state.whiteTimeInMs : state.blackTimeInMs;
 		wcout << L"Time left: " << timeLeft / 1000 / 60 << L":" << timeLeft / 1000 % 60 << (state.paused ? L" PAUSED" : L"") << endl;
 	}
-	wcout << (state.whiteMove ? L"White" : L"Black") << L"'s move (e.g. e2 e4): ";
 }
 
 bool Game::doesPieceHaveLegalMoves(int row, int col) {
@@ -478,6 +477,7 @@ void Game::makeMove() {
 	const int BUFFER_SIZE = 128;
 	char moveFrom[BUFFER_SIZE];
 	char moveTo[BUFFER_SIZE];
+	wcout << (state.whiteMove ? L"White" : L"Black") << L"'s move (e.g. e2 e4): ";
 	cin >> moveFrom;
 	while (compareStrs(moveFrom, "save", false))
 	{
