@@ -8,8 +8,7 @@ using namespace std;
 
 MoveValidator::MoveValidator(Piece* (&board)[BOARD_SIZE][BOARD_SIZE], GameState& state) : board(board), state(state) {}
 
-bool MoveValidator::isKingCapturableAt(int row, int col)
-{
+bool MoveValidator::isKingCapturableAt(int row, int col) {
 	int kingRow = state.whiteMove ? state.whiteKingRow : state.blackKingRow;
 	int kingCol = state.whiteMove ? state.whiteKingCol : state.blackKingCol;
 
@@ -43,8 +42,7 @@ bool MoveValidator::isKingCapturableAt(int row, int col)
 	return result;
 }
 
-void MoveValidator::validateCastle(int rowFrom, int colFrom, int rowTo, int colTo)
-{
+void MoveValidator::validateCastle(int rowFrom, int colFrom, int rowTo, int colTo) {
 	Piece* king = board[rowFrom][colFrom];
 	COLORS color = king->getColor();
 
@@ -122,18 +120,15 @@ void MoveValidator::validateKingSafety(int rowFrom, int colFrom, int rowTo, int 
 	board[rowTo][colTo] = capturedPiece;
 }
 
-void MoveValidator::validateMove(int rowFrom, int colFrom, int rowTo, int colTo)
-{
-	if (rowFrom == rowTo && colFrom == colTo)
-	{
+void MoveValidator::validateMove(int rowFrom, int colFrom, int rowTo, int colTo) {
+	if (rowFrom == rowTo && colFrom == colTo) {
 		throw invalid_argument("Invalid move. Select 2 different squares.");
 	}
 
 	Piece* fromPiece = board[rowFrom][colFrom];
 	Piece* toPiece = board[rowTo][colTo];
 
-	if (!((fromPiece->getColor() == WHITE && state.whiteMove) || (fromPiece->getColor() == BLACK && !state.whiteMove)))
-	{
+	if (!((fromPiece->getColor() == WHITE && state.whiteMove) || (fromPiece->getColor() == BLACK && !state.whiteMove))) {
 		throw invalid_argument("Invalid move. Move only your own pieces.");
 	}
 

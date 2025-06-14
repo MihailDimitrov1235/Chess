@@ -14,16 +14,13 @@ void DataManager::saveGame() const {
 	}
 	outFile.write(reinterpret_cast<const char*>(&state), sizeof(GameState));
 
-	for (size_t i = 0; i < BOARD_SIZE; i++)
-	{
-		for (size_t j = 0; j < BOARD_SIZE; j++)
-		{
+	for (size_t i = 0; i < BOARD_SIZE; i++) {
+		for (size_t j = 0; j < BOARD_SIZE; j++) {
 			Piece* piece = board[i][j];
 			PIECES type = piece->getType();
 			COLORS color = piece->getColor();
 			outFile.write(reinterpret_cast<const char*>(&type), sizeof(int));
 			outFile.write(reinterpret_cast<const char*>(&color), sizeof(int));
-
 		}
 	}
 
@@ -43,10 +40,8 @@ void DataManager::loadGame()
 	}
 	inFile.read(reinterpret_cast<char*>(&state), sizeof(GameState));
 
-	for (size_t i = 0; i < BOARD_SIZE; i++)
-	{
-		for (size_t j = 0; j < BOARD_SIZE; j++)
-		{
+	for (size_t i = 0; i < BOARD_SIZE; i++) {
+		for (size_t j = 0; j < BOARD_SIZE; j++) {
 			PIECES type;
 			COLORS color;
 			inFile.read(reinterpret_cast<char*>(&type), sizeof(int));

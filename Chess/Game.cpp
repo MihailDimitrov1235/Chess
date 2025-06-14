@@ -26,8 +26,7 @@ void Game::setupPawns(COLORS color, int row) {
 }
 
 void Game::freePositionsMemory() {
-	for (size_t i = 0; i < prevPos.positionsSize; i++)
-	{
+	for (size_t i = 0; i < prevPos.positionsSize; i++) {
 		delete[] prevPos.positions[i];
 	}
 	delete[] prevPos.positions;
@@ -94,8 +93,7 @@ void Game::copyFrom(const Game& other) {
 
 void Game::savePosition() {
 	char* newPosition = encodeBoard(board);
-	for (size_t i = 0; i < prevPos.positionsSize; i++)
-	{
+	for (size_t i = 0; i < prevPos.positionsSize; i++) {
 		if (compareStrs(prevPos.positions[i], newPosition)) {
 			prevPos.positionsCounter[i] += 1;
 			delete[] newPosition;
@@ -105,8 +103,7 @@ void Game::savePosition() {
 	int newSize = prevPos.positionsSize + 1;
 	char** newPositions = new char* [newSize];
 	int* newPositionsCounter = new int[newSize];
-	for (size_t i = 0; i < prevPos.positionsSize; i++)
-	{
+	for (size_t i = 0; i < prevPos.positionsSize; i++) {
 		newPositions[i] = new char[BOARD_SIZE * BOARD_SIZE + 1];
 		strcpy_s(newPositions[i], BOARD_SIZE * BOARD_SIZE + 1, prevPos.positions[i]);
 		newPositionsCounter[i] = prevPos.positionsCounter[i];
@@ -159,12 +156,10 @@ void Game::chooseGamemode() {
 	wcout << L"Welcome to chess. Select one of the options below: \n(1) New Game \n(2) Load Game \n";
 	selectOption(option, 1, 2);
 
-	if (option == 1)
-	{
+	if (option == 1) {
 		wcout << L"Select the type of the game: \n(1) No time control \n(2) Timed game \n";
 		selectOption(option, 1, 2);
-		if (option == 2)
-		{
+		if (option == 2) {
 			int time;
 			wcout << L"Choose total time per player in minutes(1-300)\n";
 			selectOption(time, 1, 300);
@@ -202,8 +197,7 @@ void Game::printBoard() const {
 	printCols(reverse);
 
 	int pieceColor = BLACK_COLOR;
-	for (size_t i = 0; i < BOARD_SIZE; i++)
-	{
+	for (size_t i = 0; i < BOARD_SIZE; i++) {
 		wcout << (reverse ? i + 1 : BOARD_SIZE - i) << L' ';
 		for (size_t j = 0; j < BOARD_SIZE; j++) {
 			bool isWhiteSquare = (i + j) % 2 == 0;
@@ -228,8 +222,7 @@ void Game::printBoard() const {
 
 	printCols(reverse);
 
-	if (state.timedGame)
-	{
+	if (state.timedGame) {
 		size_t timeLeft = state.whiteMove ? state.whiteTimeInMs : state.blackTimeInMs;
 		wcout << L"Time left: " << timeLeft / 1000 / 60 << L":" << timeLeft / 1000 % 60 << (state.paused ? L" PAUSED" : L"") << endl;
 	}
@@ -262,17 +255,13 @@ bool Game::doesPieceHaveLegalMoves(int row, int col) {
 
 bool Game::doesPlayerHaveLegalMoves() {
 	COLORS color = state.whiteMove ? WHITE : BLACK;
-	for (int row = 0; row < BOARD_SIZE; row++)
-	{
-		for (int col = 0; col < BOARD_SIZE; col++)
-		{
+	for (int row = 0; row < BOARD_SIZE; row++) {
+		for (int col = 0; col < BOARD_SIZE; col++) {
 			Piece* currentPiece = board[row][col];
-			if (currentPiece->getColor() != color)
-			{
+			if (currentPiece->getColor() != color) {
 				continue;
 			}
-			if (doesPieceHaveLegalMoves(row, col))
-			{
+			if (doesPieceHaveLegalMoves(row, col)) {
 				return true;
 			}
 		}
@@ -281,8 +270,7 @@ bool Game::doesPlayerHaveLegalMoves() {
 }
 
 bool Game::isGameOver() {
-	if (!doesPlayerHaveLegalMoves())
-	{
+	if (!doesPlayerHaveLegalMoves()) {
 		int kingRow = state.whiteMove ? state.whiteKingRow : state.blackKingRow;
 		int kingCol = state.whiteMove ? state.whiteKingCol : state.blackKingCol;
 		if (validator.isKingCapturableAt(kingRow, kingCol)) {
@@ -297,13 +285,11 @@ bool Game::isGameOver() {
 		wcout << L"Game ends in a draw because of lack of pieces for checkmate.";
 		return true;
 	}
-	if (hasThreefoldRepetition(prevPos))
-	{
+	if (hasThreefoldRepetition(prevPos)) {
 		wcout << L"Game ends in a draw due to threefold repetition.";
 		return true;
 	}
-	if (state.timedGame && (state.whiteTimeInMs <= 0 || state.blackTimeInMs <= 0))
-	{
+	if (state.timedGame && (state.whiteTimeInMs <= 0 || state.blackTimeInMs <= 0)) {
 		wcout << (state.whiteTimeInMs <= 0 ? L"Black" : L"White") << L" wins due to timeout!";
 		return true;
 	}
@@ -391,14 +377,12 @@ void Game::handleEnPassantRelatedMove(int rowFrom, int colFrom, int rowTo, int c
 void Game::handlePromotion(int row, int col) {
 	int promotionRow = state.whiteMove ? 0 : 7;
 	COLORS color = state.whiteMove ? WHITE : BLACK;
-	if (board[row][col]->getType() == PAWN && promotionRow == row)
-	{
+	if (board[row][col]->getType() == PAWN && promotionRow == row) {
 		wcout << L"Promote pawn into: \n(1) Queen \n(2) Rook \n(3) Bishop \n(4) Knight\n";
 		int selectedPromotion;
 		selectOption(selectedPromotion, 1, 4);
 		delete board[row][col];
-		switch (selectedPromotion)
-		{
+		switch (selectedPromotion) {
 		case 1:
 			board[row][col] = new Queen(color);
 			break;
@@ -479,14 +463,12 @@ void Game::makeMove() {
 	char moveTo[BUFFER_SIZE];
 	wcout << (state.whiteMove ? L"White" : L"Black") << L"'s move (e.g. e2 e4): ";
 	cin >> moveFrom;
-	while (compareStrs(moveFrom, "save", false))
-	{
+	while (compareStrs(moveFrom, "save", false)) {
 		dataManager.saveGame();
 		wcout << L"Game saved\n";
 		cin >> moveFrom;
 	}
-	if (compareStrs(moveFrom, "pause", false))
-	{
+	if (compareStrs(moveFrom, "pause", false)) {
 		state.paused = true;
 		return;
 	}
@@ -523,4 +505,3 @@ void Game::setTimeControl(size_t totalTimeInMs, size_t timePerMoveInMs) {
 	state.incrementInMs = timePerMoveInMs;
 	state.paused = true;
 }
-

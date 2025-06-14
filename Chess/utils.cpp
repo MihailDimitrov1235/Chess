@@ -138,12 +138,10 @@ bool hasPiecesForMate(Piece* const board[BOARD_SIZE][BOARD_SIZE]) {
 			}
 			COLORS squareColor = (row + col) % 2 == 0 ? WHITE : BLACK;
 			if (piece->getColor() == WHITE) {
-				if (type == KNIGHT || (type == BISHOP && squareColor != whiteBishopSquareColor))
-				{
+				if (type == KNIGHT || (type == BISHOP && squareColor != whiteBishopSquareColor)) {
 					whiteMinorPieces++;
 				}
-				if (type == BISHOP)
-				{
+				if (type == BISHOP) {
 					whiteBishopSquareColor = squareColor;
 				}
 			}
@@ -158,8 +156,7 @@ bool hasPiecesForMate(Piece* const board[BOARD_SIZE][BOARD_SIZE]) {
 
 		}
 	}
-	if (whiteMinorPieces >= 2 || blackMinorPieces >= 2)
-	{
+	if (whiteMinorPieces + blackMinorPieces >= 2) {
 		return true;
 	}
 	return false;
